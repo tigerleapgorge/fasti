@@ -5,7 +5,7 @@
     var canvas = document.getElementById("myCanvas");
     var ctx = canvas.getContext("2d");
 /*******                Data                     ******/
-    var sourceCode = "( + 3 5 )";
+    var sourceCode = "((( + 3 5 ]])";
 
 /*******                Vector                      ******/
     function Vector(x, y) {
@@ -34,12 +34,14 @@
     function drawAll(){ // draw loop
         ctx.clearRect(0, 0, canvas.width, canvas.height); // clear screen
         drawText(sourceCode, Vector(20,20) ); // TODO: change hard coded
+        drawText(tokenArray, Vector(20,50) ); // TODO: change hard coded
 
 		requestAnimationFrame(drawAll); // loop
     }
     
     // Main Loop
     function main(){
+        tokenArray = sourceCode.replace(/\(/g, " ( ")
         drawAll();
     }
     //setInterval(drawAll, 16);  // run faster for debugging

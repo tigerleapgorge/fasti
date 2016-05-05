@@ -5,7 +5,9 @@
     var canvas = document.getElementById("myCanvas");
     var ctx = canvas.getContext("2d");
 /*******                Data                     ******/
-    var sourceCode = "((( + 3 5 ]])";
+    var sourceCode = "( + 3 5 )";
+    var tokenArray = [];
+    var ast = [];
 
 /*******                Vector                      ******/
     function Vector(x, y) {
@@ -35,13 +37,39 @@
         ctx.clearRect(0, 0, canvas.width, canvas.height); // clear screen
         drawText(sourceCode, Vector(20,20) ); // TODO: change hard coded
         drawText(tokenArray, Vector(20,50) ); // TODO: change hard coded
+        drawText(ast, Vector(20,80) );
 
 		requestAnimationFrame(drawAll); // loop
+    }
+    
+    var parenthesize = function(tokenList) {
+        var retArray = [];
+        while( tokenList.length ) {
+            var curToken = tokenList.shift();
+            if(curToken === "("){ 
+                retArray.push( parenthesize(tokenList) );
+            } else if(curToken === ")") {
+                return retArray;
+            } else {
+                retArray.push( curToken );
+            }
+        }
+        return retArray;
     }
     
     // Main Loop
     function main(){
         tokenArray = sourceCode.replace(/\(/g, " ( ")
+                               .replace(/\[/g, " [ ")
+                               .replace(/\]/g, " ] ")
+                               .replace(/\)/g, " ) ")
+                               .trim()
+                               .split(/\s+/);
+        console.log(tokenArray);
+
+        ast = parenthesize(tokenArray);
+        
+        console.log(ast);
         drawAll();
     }
     //setInterval(drawAll, 16);  // run faster for debugging

@@ -42,16 +42,24 @@
 		requestAnimationFrame(drawAll); // loop
     }
     
+    var categorize = function(curToken){
+        if ( !isNaN(curToken) ) {
+            return { type : "number" , value : parseFloat(curToken) };
+        } else {
+            return { type : "identifier", value : curToken };
+        }
+    }
+    
     var parenthesize = function(tokenList) {
         var retArray = [];
         while( tokenList.length ) {
             var curToken = tokenList.shift();
             if(curToken === "("){ 
-                retArray.push( parenthesize(tokenList) );
+                retArray.push( parenthesize(tokenList) ); // recursive
             } else if(curToken === ")") {
                 return retArray;
             } else {
-                retArray.push( curToken );
+                retArray.push( categorize(curToken) );
             }
         }
         return retArray;
@@ -68,7 +76,6 @@
         console.log(tokenArray);
 
         ast = parenthesize(tokenArray);
-        
         console.log(ast);
         drawAll();
     }

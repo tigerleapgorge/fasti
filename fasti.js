@@ -42,6 +42,7 @@
 		requestAnimationFrame(drawAll); // loop
     }
     
+/*******                Parser                      ******/
     var categorize = function(curToken){
         if ( !isNaN(curToken) ) {
             return { type : "number" , value : parseFloat(curToken) };
@@ -64,11 +65,12 @@
         }
         return retArray;
     }
-    
+
+/*******                Library                      ******/
     var library = {
         "+" : function(x, y) {
-                console.log("plus", x, y, x[0], x[1]);
-                return x[0] + x[1];
+                console.log("lib: +", x, y);
+                return x + y;
               }
         
     }
@@ -86,23 +88,22 @@
         };
     }
     
+/*******                Interpreter                      ******/
     var interpretList = function(input, context) {
         
         // non-special form
-        console.log("before:", input);
+        console.log("before map:", input);
         var list = input.map( // interpret every node in the list
             function(x) { 
                 return interpret(x, context); 
             }               );
-        console.log("after: ", list);
-        if (list[0] instanceof Function) { // invoke the function
-            console.log("list:", list);
+        console.log("after map: ", list);
+        if (list[0] instanceof Function) { // intrinsic JS function
             var newlist = list.slice(1);
-            console.log("newlist:", newlist);
-            // each array element maps to a variable in the function, like intrinsics 
-            var myres = list[0].apply(undefined, list.slice(1)); 
-            console.log(myres);
-            return myres;
+            // apply: each list element becomes an actual arg
+            var apply_result = list[0].apply(undefined, list.slice(1)); 
+            console.log("apply result: ", apply_result);
+            return apply_result;
         }
     }
     
@@ -120,7 +121,7 @@
         
     }
     
-    // Main Loop
+/*******                Main Loop                      ******/
     function main(){
         tokenArray = sourceCode.replace(/\(/g, " ( ")
                                .replace(/\[/g, " [ ")

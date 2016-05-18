@@ -5,7 +5,7 @@
     var canvas = document.getElementById("myCanvas");
     var ctx = canvas.getContext("2d");
 /*******                Data                     ******/
-    var sourceCode = "( + 3 5 )";
+    var sourceCode = "( ( lambda ( a b ) (+ a b ) ) 8 55 )";
     var tokenArray = [];
     var ast = [];
 
@@ -83,27 +83,61 @@
           if (identifier in this.scope) {
               return this.scope[identifier];
           } else if (this.parent !== undefined) {
-              return this.parently.get(indentifier); // recursive to the top.
+              return this.parent.get(identifier); // recursive to the top.
           }
         };
     }
-    
+
+    var special = {
+        if : function(input, context) {
+                console.log("If: input[1]", input[1] );
+            if ( interpret( input[1], context ) ) {
+                console.log("True: input[2]", input[2] );
+                return interpret( input[2], context );
+            } else {
+                console.log("False: input[3]", input[3] );
+                return interpret( input[3], context );
+            }
+        } , 
+        lambda : function(input, context) {
+            return function(){
+                console.log("lambda arguments: ", arguments);
+                var lambdaArguments = arguments;
+                var lambdaScope = input[1].reduce( // TODO: change to foreach
+                        function(acc, x, i) {
+                            acc[x.value] = lambdaArguments[i];
+                            return acc;
+                            }, {}                    )
+                console.log("lambdaScope: ", lambdaScope);
+                console.log("context: ", context);
+                var newContext = new Context(lambdaScope, context);
+                console.log("newContext: ", newContext);
+                console.log("input[2]; ", input[2]);
+                var lambda_res = interpret(input[2], newContext);
+                console.log("lambda_res; ", lambda_res);
+            }
+        }
+    }
 /*******                Interpreter                      ******/
     var interpretList = function(input, context) {
-        
-        // non-special form
-        console.log("before map:", input);
-        var list = input.map( // interpret every node in the list
-            function(x) { 
-                return interpret(x, context); 
-            }               );
-        console.log("after map: ", list);
-        if (list[0] instanceof Function) { // intrinsic JS function
-            var newlist = list.slice(1);
-            // apply: each list element becomes an actual arg
-            var apply_result = list[0].apply(undefined, list.slice(1)); 
-            console.log("apply result: ", apply_result);
-            return apply_result;
+        if (input.length > 0 && input[0].value in special) {
+            return special[input[0].value](input, context);
+        } else { // non-special form
+            console.log("before map:", input);
+            var list = input.map( // interpret every node in the list
+                function(x) {
+                    console.log("interpreting x: ", x);
+                    console.log("interpreting context: ", context);
+                    return interpret(x, context); 
+                }               );
+            console.log("after map: ", list);
+            if (list[0] instanceof Function) { // intrinsic JS function
+                var newlist = list.slice(1);
+                // apply: each list element becomes an actual arg
+                var apply_result = list[0].apply(undefined, list.slice(1)); 
+                console.log("apply result: ", apply_result);
+                return apply_result;
+            }
         }
     }
     
@@ -112,8 +146,10 @@
             return interpret(input, new Context(library) )
         }
         if(input instanceof Array) {
-            return interpretList(input); // recursive decent
+            console.log("interpret list: ", input);
+            return interpretList(input, context); // recursive decent
         } else if (input.type === "identifier") {
+            console.log("interpret identifier: ", input);
             return context.get(input.value);
         } else if (input.type === "number") {
             return input.value;
@@ -134,8 +170,8 @@
         ast = parenthesize(tokenArray);
         console.log(ast);
 
-        var res = interpret(ast);
-        console.log(res);
+        var final_res = interpret(ast);
+        console.log("Final Result: ", final_res);
 
         drawAll();
     }

@@ -5,7 +5,9 @@
     var canvas = document.getElementById("myCanvas");
     var ctx = canvas.getContext("2d");
 /*******                Data                     ******/
-    var sourceCode = "( ( lambda ( a b ) (+ a b ) ) 8 55 )";
+    var sourceCode = "( ( lambda ( a b ) (+ a b) ) 8 55 )";
+    //var sourceCode = "( ( lambda (x) x) 3)";
+    //var sourceCode = "(+ 3 5)";
     var tokenArray = [];
     var ast = [];
 
@@ -69,10 +71,20 @@
 /*******                Library                      ******/
     var library = {
         "+" : function(x, y) {
+            /*
                 console.log("lib: +", x, y);
                 return x + y;
+            */
+                console.log("arguements: ", arguments);
+                console.log("arguements length: ", arguments.length);
+                var sum = 0;
+                for(var i = 0; i < arguments.length; i++) {
+                    console.log("arguments[i]: ", arguments[i]);
+                    sum += arguments[i];
+                }
+                console.log("sum: ", sum);
+                return sum;
               }
-        
     }
     
     var Context = function(scope, parent) {
@@ -100,7 +112,7 @@
             }
         } , 
         lambda : function(input, context) {
-            return function(){
+            return function() {
                 console.log("lambda arguments: ", arguments);
                 var lambdaArguments = arguments;
                 var lambdaScope = input[1].reduce( // TODO: change to foreach
@@ -108,53 +120,63 @@
                             acc[x.value] = lambdaArguments[i];
                             return acc;
                             }, {}                    )
-                console.log("lambdaScope: ", lambdaScope);
-                console.log("context: ", context);
+                //console.log("lambdaScope: ", lambdaScope);
+                //console.log("context: ", context);
                 var newContext = new Context(lambdaScope, context);
-                console.log("newContext: ", newContext);
-                console.log("input[2]; ", input[2]);
+                //console.log("newContext: ", newContext);
+                //console.log("input[2]; ", input[2]);
                 var lambda_res = interpret(input[2], newContext);
                 console.log("lambda_res; ", lambda_res);
+                return lambda_res;
             }
         }
     }
 /*******                Interpreter                      ******/
     var interpretList = function(input, context) {
+        console.log("-- INTERPRET LIST: ", input);
         if (input.length > 0 && input[0].value in special) {
-            return special[input[0].value](input, context);
+            console.log("is special: ", input[0]);
+            var special_return = special[input[0].value](input, context);
+            console.log("special_return", special_return);
+            return special_return;
         } else { // non-special form
-            console.log("before map:", input);
+            console.log("Not Special input:", input);
             var list = input.map( // interpret every node in the list
                 function(x) {
-                    console.log("interpreting x: ", x);
-                    console.log("interpreting context: ", context);
-                    return interpret(x, context); 
+                    console.log("mapping x: ", x);
+                    //console.log("interpreting context: ", context);
+                    var map_res = interpret(x, context);
+                    //console.log("interpreting map_res: ", map_res);
+                    return map_res; 
                 }               );
-            console.log("after map: ", list);
+            console.log("Not Special map result: ", list);
             if (list[0] instanceof Function) { // intrinsic JS function
-                var newlist = list.slice(1);
+                console.log("apply list: ", list);
                 // apply: each list element becomes an actual arg
                 var apply_result = list[0].apply(undefined, list.slice(1)); 
-                console.log("apply result: ", apply_result);
+                console.log("apply_result: ", apply_result);
                 return apply_result;
+            } else {
+                return list;
             }
         }
     }
     
     var interpret = function(input, context) {
+        console.log("INTERPRET: ", input);
         if(context === undefined) {
+            console.log("no context: ");
             return interpret(input, new Context(library) )
-        }
-        if(input instanceof Array) {
-            console.log("interpret list: ", input);
+        } else if(input instanceof Array) {
+            console.log("is list: ", input);
             return interpretList(input, context); // recursive decent
         } else if (input.type === "identifier") {
-            console.log("interpret identifier: ", input);
+            console.log("is identifier: ", input);
             return context.get(input.value);
         } else if (input.type === "number") {
+            console.log("is number: ", input);
             return input.value;
         }
-        
     }
     
 /*******                Main Loop                      ******/

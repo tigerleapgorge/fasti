@@ -71,18 +71,11 @@
 /*******                Library                      ******/
     var library = {
         "+" : function(x, y) {
-            /*
-                console.log("lib: +", x, y);
-                return x + y;
-            */
-                console.log("arguements: ", arguments);
-                console.log("arguements length: ", arguments.length);
+            //  return x + y;
                 var sum = 0;
                 for(var i = 0; i < arguments.length; i++) {
-                    console.log("arguments[i]: ", arguments[i]);
                     sum += arguments[i];
                 }
-                console.log("sum: ", sum);
                 return sum;
               }
     }
@@ -120,17 +113,14 @@
                             acc[x.value] = lambdaArguments[i];
                             return acc;
                             }, {}                    )
-                //console.log("lambdaScope: ", lambdaScope);
-                //console.log("context: ", context);
                 var newContext = new Context(lambdaScope, context);
-                //console.log("newContext: ", newContext);
-                //console.log("input[2]; ", input[2]);
                 var lambda_res = interpret(input[2], newContext);
                 console.log("lambda_res; ", lambda_res);
                 return lambda_res;
             }
         }
     }
+
 /*******                Interpreter                      ******/
     var interpretList = function(input, context) {
         console.log("-- INTERPRET LIST: ", input);
@@ -143,17 +133,11 @@
             console.log("Not Special input:", input);
             var list = input.map( // interpret every node in the list
                 function(x) {
-                    console.log("mapping x: ", x);
-                    //console.log("interpreting context: ", context);
                     var map_res = interpret(x, context);
-                    //console.log("interpreting map_res: ", map_res);
                     return map_res; 
                 }               );
-            console.log("Not Special map result: ", list);
             if (list[0] instanceof Function) { // intrinsic JS function
-                console.log("apply list: ", list);
-                // apply: each list element becomes an actual arg
-                var apply_result = list[0].apply(undefined, list.slice(1)); 
+                var apply_result = list[0].apply(undefined, list.slice(1)); // apply: each list element becomes an actual arg 
                 console.log("apply_result: ", apply_result);
                 return apply_result;
             } else {

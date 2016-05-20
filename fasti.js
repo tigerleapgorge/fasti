@@ -58,7 +58,7 @@
         while( tokenList.length ) {
             var curToken = tokenList.shift();
             if(curToken === "("){ 
-                retArray.push( parenthesize(tokenList) ); // recursive
+                retArray.push( { type : "expr" , value : parenthesize(tokenList) } ); // recursive
             } else if(curToken === ")") {
                 return retArray;
             } else {
@@ -108,7 +108,11 @@
             return function() {
                 console.log("lambda arguments: ", arguments);
                 var lambdaArguments = arguments;
-                var lambdaScope = input[1].reduce( // TODO: change to foreach
+                // .value is added to get around the array encapsulation
+                // TODO: change to foreach and ABSTRACT to a seperate function
+                //       place new function near interpretList to make Expr
+                //       processing easier
+                var lambdaScope = input[1].value.reduce( 
                         function(acc, x, i) {
                             acc[x.value] = lambdaArguments[i];
                             return acc;
@@ -148,12 +152,15 @@
     
     var interpret = function(input, context) {
         console.log("INTERPRET: ", input);
-        if(context === undefined) {
+        if (context === undefined) {
             console.log("no context: ");
             return interpret(input, new Context(library) )
-        } else if(input instanceof Array) {
-            console.log("is list: ", input);
-            return interpretList(input, context); // recursive decent
+        } else if (input instanceof Array) {
+            console.log("is Array: ", input);
+            return interpretList(input, context); // Old way
+        } else if (input.type === "expr") {
+            console.log("is Expr obj: ", input);
+            return interpretList(input.value, context); // New way
         } else if (input.type === "identifier") {
             console.log("is identifier: ", input);
             return context.get(input.value);

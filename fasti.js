@@ -93,6 +93,7 @@
         };
     }
 
+/*******                Interpreter                      ******/
     var special = {
         if : function(input, context) {
                 console.log("If: input[1]", input[1] );
@@ -125,7 +126,6 @@
         }
     }
 
-/*******                Interpreter                      ******/
     var interpretList = function(input, context) {
         console.log("-- INTERPRET LIST: ", input);
         if (input.length > 0 && input[0].value in special) {

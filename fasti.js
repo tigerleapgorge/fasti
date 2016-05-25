@@ -12,21 +12,21 @@
     var ast = [];
 
 /*******                Vector                      ******/
-    function Vector(x, y) {
-        if ( !(this instanceof Vector) ) { // dont need new
-           var new_vec = new Vector(x, y);
+    function vector(x, y) {
+        if ( !(this instanceof vector) ) { // dont need new
+           var new_vec = new vector(x, y);
            return new_vec;
         }
         this.x = x || 0;
         this.y = y || 0;
     };
 
-	Vector.prototype.add = function(vecArg) {
-        return new Vector(this.x + vecArg.x, this.y + vecArg.y);
+	vector.prototype.add = function(vecArg) {
+        return new vector(this.x + vecArg.x, this.y + vecArg.y);
 	};
 
-    var deltaRightVector = new Vector(50,0);
-    var deltaDownVector = new Vector(0,50);
+    var deltaRightVector = new vector(50,0);
+    var deltaDownVector = new vector(0,50);
 
 /*******                Graphics                      ******/
     function drawText(myStr, posVector){
@@ -35,11 +35,18 @@
         ctx.fillText(myStr, posVector.x-10, posVector.y+7);
     }
 
+    function drawRect(position){
+        console.log("drawRect ", position);
+        ctx.fillStyle = "green";
+        ctx.fillRect(position.x, position.y, 20, 20);
+
+    }
+
     function drawAll(){ // draw loop
         ctx.clearRect(0, 0, canvas.width, canvas.height); // clear screen
-        drawText(sourceCode, Vector(20,20) ); // TODO: change hard coded
-        drawText(tokenArray, Vector(20,50) ); // TODO: change hard coded
-        drawText(ast, Vector(20,80) );
+        drawText(sourceCode, vector(20,20) ); // TODO: change hard coded
+        drawText(tokenArray, vector(20,50) ); // TODO: change hard coded
+        drawText(ast, vector(20,80) );
 
 		requestAnimationFrame(drawAll); // loop
     }
@@ -127,7 +134,7 @@
     }
 
     var interpretList = function(input, context) {
-        console.log("-- INTERPRET LIST: ", input);
+        console.log("INTERPRET LIST: ", input);
         if (input.length > 0 && input[0].value in special) {
             console.log("is special: ", input[0]);
             var special_return = special[input[0].value](input, context);
@@ -169,6 +176,43 @@
             return input.value;
         }
     }
+
+    var visualizeList = function(input, position) {
+        var curPosition = position;
+        for(var i = 0; i < input.length; i++){
+            console.log("visualizeList ", curPosition);
+            visualize(input[i], curPosition);
+            curPosition = curPosition.add(deltaRightVector);
+        }
+        return;
+    }
+
+    var visualize = function(input, position) {
+        console.log("In visualize");
+        if (position === undefined) {
+            console.log("Vis no position");
+            return visualize(input, new vector(canvas.width/2,  canvas.height/8) );
+        } else if (input === undefined) {
+            console.log("Vis no input");
+            return;
+        } else if (input instanceof Array) {
+            console.log("Vis Array");
+            visualizeList(input, position);
+            return;
+        } else { 
+            console.log("Vis Else", input.pos, position);
+            if (input.pos === undefined) {
+                input.pos = new vector(position.x, position.y);
+            }
+            
+            drawRect(input.pos);
+            
+            if (input.type === "expr") {
+                visualizeList(input.value, position.add(deltaDownVector) );
+            }
+            return;
+        }
+    }
     
 /*******                Main Loop                      ******/
     function main(){
@@ -183,10 +227,12 @@
         ast = parenthesize(tokenArray);
         console.log(ast);
 
+        visualize(ast);
+
         var final_res = interpret(ast);
         console.log("Final Result: ", final_res);
 
-        drawAll();
+        //drawAll();
     }
     //setInterval(drawAll, 16);  // run faster for debugging
     document.addEventListener('DOMContentLoaded', main, false); // start when ready

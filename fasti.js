@@ -44,9 +44,6 @@
 
     function drawAll(){ // draw loop
         ctx.clearRect(0, 0, canvas.width, canvas.height); // clear screen
-        drawText(sourceCode, vector(20,20) ); // TODO: change hard coded
-        drawText(tokenArray, vector(20,50) ); // TODO: change hard coded
-        drawText(ast, vector(20,80) );
 
 		requestAnimationFrame(drawAll); // loop
     }
@@ -65,7 +62,7 @@
         while( tokenList.length ) {
             var curToken = tokenList.shift();
             if(curToken === "("){ 
-                retArray.push( { type : "expr" , value : parenthesize(tokenList) } ); // recursive
+                retArray.push( { type : "expr" , sexpr : parenthesize(tokenList) } ); // recursive
             } else if(curToken === ")") {
                 return retArray;
             } else {
@@ -120,7 +117,7 @@
                 // TODO: change to foreach and ABSTRACT to a seperate function
                 //       place new function near interpretList to make Expr
                 //       processing easier
-                var lambdaScope = input[1].value.reduce( 
+                var lambdaScope = input[1].sexpr.reduce( 
                         function(acc, x, i) {
                             acc[x.value] = lambdaArguments[i];
                             return acc;
@@ -167,7 +164,7 @@
             return interpretList(input, context); // Old way
         } else if (input.type === "expr") {
             console.log("is Expr obj: ", input);
-            return interpretList(input.value, context); // New way
+            return interpretList(input.sexpr, context); // New way
         } else if (input.type === "identifier") {
             console.log("is identifier: ", input);
             return context.get(input.value);
@@ -206,9 +203,12 @@
             }
             
             drawRect(input.pos);
+            if(input.type !== "expr") {
+                drawText(input.value, input.pos);
+            }
             
             if (input.type === "expr") {
-                visualizeList(input.value, position.add(deltaDownVector) );
+                visualizeList(input.sexpr, position.add(deltaDownVector) );
             }
             return;
         }

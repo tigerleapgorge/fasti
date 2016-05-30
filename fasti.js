@@ -214,6 +214,37 @@
         }
     }
     
+    var applySpring = function(posA, posB) {
+        return;
+        
+        
+    }
+    
+    var springList = function(input, prev) {
+        console.log("springList");
+        if (input === undefined ) {
+            console.log("springList NO input");
+            return;
+        } else if ( !(input instanceof Array) ) {
+            console.log("springList Not Array");
+            return;
+        } else {
+            console.log("input.length: ", input.length);
+            for(var i = 1; i < input.length; i++) {
+                console.log("springList action: ", input[i-1]);
+                applySpring(input[i-1].pos, input[i].pos);
+                input[i-1].pos.x += 1;
+            }
+            for(var i = 0; i < input.length; i++) {
+                console.log("springList Recurse: ", input[i]);
+                if (input[i].type === "expr") {
+                    springList(input[i].sexpr, input[i]);
+                }
+            }
+        }
+        
+    }
+    
 /*******                Main Loop                      ******/
     function main(){
         tokenArray = sourceCode.replace(/\(/g, " ( ")
@@ -225,9 +256,21 @@
         console.log(tokenArray);
 
         ast = parenthesize(tokenArray);
-        console.log(ast);
-
+        
+        console.log("ast ", ast);
+        console.log("type of ast: ", typeof ast);
+        console.log("ast is array: ", ast instanceof Array);
+                
+        var drawCall = function() {
+            console.log("drawCall");
+            ctx.clearRect(0, 0, canvas.width, canvas.height); // clear screen
+            visualize(ast);
+            springList(ast);
+        }
+        window.setInterval(drawCall, 500);
+        
         visualize(ast);
+        springList(ast);
 
         var final_res = interpret(ast);
         console.log("Final Result: ", final_res);

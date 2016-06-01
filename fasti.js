@@ -5,9 +5,10 @@
     var canvas = document.getElementById("myCanvas");
     var ctx = canvas.getContext("2d");
 /*******                Data                     ******/
-    //var sourceCode = "( ( lambda ( a b ) (+ a b) ) 8 55 )";
+    var sourceCode = "( ( lambda ( a b ) (+ a b) ) 8 55 )";
     //var sourceCode = "( ( lambda (x) x) 3)";
-    var sourceCode = "(+ 3 5)";
+    //var sourceCode = "(+ 3 5)";
+    //var sourceCode = "1 2";
     var tokenArray = [];
     var ast = [];
 
@@ -20,6 +21,10 @@
         this.x = x || 0;
         this.y = y || 0;
     };
+
+	vector.prototype.neg = function() {
+		return new vector(this.x * -1, this.y * -1 );
+	};
 
 	vector.prototype.add = function(vecArg) {
         return new vector(this.x + vecArg.x, this.y + vecArg.y);
@@ -46,8 +51,8 @@
 		return this.divide(this.magnitude());
 	};
 
-    var deltaRightVector = new vector(50,0);
-    var deltaDownVector = new vector(0,50);
+    var deltaRightVector = new vector(77,0);
+    var deltaDownVector = new vector(0,77);
 
 /*******                Graphics                      ******/
     function drawText(myStr, posVector){
@@ -88,6 +93,7 @@
                 return retArray;
             } else {
                 retArray.push( categorize(curToken) );
+                console.log("parenthesize ", retArray);
             }
         }
         return retArray;
@@ -235,41 +241,49 @@
         }
     };
 
+    var springLength = 77;
+    var springConstant = 0.1; 
    
     var applySpring = function(inputA, inputB) {
-        var d = inputA.pos.subtract(inputB.pos);
-        var displacement = 20 - d.magnitude(); // spring length is 50
+        var d = inputB.pos.subtract(inputA.pos);
+        var displacement = d.magnitude() - springLength; // core
         var direction = d.normalize();
         
         console.log("inputA.pos ", inputA.pos);
         console.log("inputB.pos ", inputB.pos);
         console.log("d ", d);
-        console.log("d.magnitude ", d.magnitude);
+        console.log("+ d.magnitude ", d.magnitude());
+        console.log("+ displacement", displacement);
         console.log("d.normalize ", d.normalize);
         console.log("direction ", direction);
-        console.log("displacement", displacement);
+        
         
         if (inputA.a === undefined){
+            console.log("Creat new A acceleration");
             inputA.a = new vector(0, 0);
         }
         if (inputB.a === undefined){
+            console.log("Creat new B acceleration");
             inputB.a = new vector(0, 0);
         }
         
-        console.log("inputA.a ", inputA.a);
+        console.log("inputA.a before ", inputA.a);
+        console.log("inputB.a before ", inputB.a);
         
-        inputA.a = inputA.a.add( direction.multiply(0.05 * displacement * -0.5 ) );
-        inputB.a = inputB.a.add( direction.multiply(0.05 * displacement * 0.5 ) );
+        var delta_a = direction.multiply(springConstant * displacement * 0.5 )
+        console.log("delta_a ", delta_a)
         
-        console.log("inputA.a ", inputA.a);
-        console.log(" direction.multiply(50 * displacement * -0.5 )",  direction.multiply(50 * displacement * -0.5 ) );
-        console.log("inputB.a ", inputB.a);
-        console.log("inputA.a ", inputA.a);
-        
+        inputA.a = inputA.a.add( delta_a );  // core
+        inputB.a = inputB.a.add( delta_a.neg() ); // core
+       
+        console.log("inputA.a after", inputA.a);
+        console.log("inputB.a after", inputB.a);
+
         return;
     };
 
-    var timestep = 0.01; // Time Step -- super important
+    var timestep = 0.1; // Time Step -- super important
+    var damping = 0.5;
 
     var updateVelocity = function(input) {
         console.log("updateVelocity");
@@ -284,6 +298,7 @@
                     input.v = new vector(0,0);
                 }
                 input.v = input.v.add( input.a.multiply(timestep) ); // Core
+                input.v = input.v.multiply(damping); // reduce overall energy
                 
                  
                 console.log("Update Velocity: ", input);
@@ -347,9 +362,9 @@
             
             for(var i = 1; i < input.length; i++) {
                 //console.log("springList action: ", input[i-1]);
-                // input[i-1].pos.x += 1; shift to the right by 1px
-                applySpring(input[i], input[i-1]);
+                applySpring(input[i-1], input[i-0]);
             }
+            
             for(var i = 0; i < input.length; i++) {
                 //console.log("springList Recurse: ", input[i]);
                 if (input[i].type === "expr") {
@@ -405,9 +420,20 @@
 */
 
   
+/*
+        for(var f=0; f< 2; f++){
+            console.log("------   frame   ------", f);
+            ctx.clearRect(0, 0, canvas.width, canvas.height); // clear screen
+            visualize(ast);
+            springList(ast);
+            updateVelocityList(ast);
+            updatePositionList(ast);
+        }
+*/
+
 
         var frame = 0;
-        var drawCall = function() {
+        var drawCall = function() { // core
             
             console.log("drawCall", frame++);
             ctx.clearRect(0, 0, canvas.width, canvas.height); // clear screen
@@ -419,11 +445,34 @@
         window.setInterval(drawCall, 50);
 
 
-//        visualize(ast);
-//        springList(ast);
+/*
+console.log("------   frame 1  ------");
+            ctx.clearRect(0, 0, canvas.width, canvas.height); // clear screen
+            console.log("before visualize", ast);
+            visualize(ast);
+            console.log("before springlist", ast);
+            springList(ast);
+            console.log("after springlist before updateVelocity", ast);
+            updateVelocityList(ast);
+            updatePositionList(ast);
 
-//        var final_res = interpret(ast);
-//        console.log("Final Result: ", final_res);
+console.log("------   frame 2  ------");
+            ctx.clearRect(0, 0, canvas.width, canvas.height); // clear screen
+            visualize(ast);
+            springList(ast);
+            updateVelocityList(ast);
+            updatePositionList(ast);
+/*     
+console.log("------   frame 3  ------");
+            ctx.clearRect(0, 0, canvas.width, canvas.height); // clear screen
+            visualize(ast);
+            springList(ast);
+            updateVelocityList(ast);
+            updatePositionList(ast);
+ */
+           
+        var final_res = interpret(ast);
+        console.log("Final Result: ", final_res);
 
         //drawAll();
     }

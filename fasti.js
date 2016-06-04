@@ -5,10 +5,10 @@
     var canvas = document.getElementById("myCanvas");
     var ctx = canvas.getContext("2d");
 /*******                Data                     ******/
-    var sourceCode = "( ( lambda ( a b ) (+ a b) ) 8 55 )";
-    //var sourceCode = "( ( lambda (x) x) 3)";
+    //var sourceCode = "( ( lambda ( a b ) (+ a b) ) 8 55 )";
+    var sourceCode = "( ( lambda (x) x) 3)";
     //var sourceCode = "(+ 3 5)";
-    //var sourceCode = "1 2";
+    //var sourceCode = "(1 2 3)";
     var tokenArray = [];
     var ast = [];
 
@@ -44,7 +44,11 @@
 	};
     
 	vector.prototype.magnitude = function() {
-		return Math.sqrt(this.x*this.x + this.y*this.y);
+		return Math.sqrt(this.x * this.x + this.y * this.y);
+	};
+
+	vector.prototype.magnitudeSquared = function() {
+		return this.x * this.x + this.y * this.y;
 	};
     
 	vector.prototype.normalize = function() {
@@ -375,20 +379,73 @@
         
     };
     
-    var DFT = function(input) {
+    var chargeConstant = 10000; // same for now
+    
+    var applyRepulsion = function(inputA, inputB){
+        console.log("Apply Repulsion: ", inputA, inputB);
+        
+        var d = inputB.pos.subtract(inputA.pos); // TODO: when input1 and input2 pos overlap
+        var d_magSquared = d.magnitudeSquared(); // denominator
+        var direction = d.normalize(); // unit length
+        
+        console.log("inputA.pos ", inputA.pos);
+        console.log("inputB.pos ", inputB.pos);
+        console.log("d ", d);
+        console.log("+ d_magSquared", d_magSquared);
+        console.log("direction ", direction);
+        
+        
+        if (inputA.a === undefined){
+            console.log("Creat new A acceleration applyRepulsion ");
+            inputA.a = new vector(0, 0);
+        }
+        if (inputB.a === undefined){
+            console.log("Creat new B acceleration applyRepulsion ");
+            inputB.a = new vector(0, 0);
+        }
+        
+        console.log("inputA.a before ", inputA.a);
+        console.log("inputB.a before ", inputB.a);
+        
+        var delta_a = direction.multiply(0.5 * chargeConstant / d_magSquared )
+        console.log("delta_a ", delta_a)
+        
+        inputA.a = inputA.a.add( delta_a.neg() );  // core
+        inputB.a = inputB.a.add( delta_a ); // core
+       
+        console.log("inputA.a after", inputA.a);
+        console.log("inputB.a after", inputB.a);
+
+        return;
+    }
+    
+    var DFT = function(input, other) {
+        console.log("DFT: ", input);
         if (input instanceof Array) {
-            DFT_list(input);
+            DFT_list(input, other);
         } else {
-            console.log("DFT ", input);
+            // For each node, transverse AST and apply 
+            if(other === undefined) {
+                console.log("Second round");
+                DFT_list(ast, input); // O(N^2)
+            } else {
+                if(input !== other){
+                    applyRepulsion(input, other);
+                }
+            }
+            
+            
             if(input.type === "expr") {
-                DFT_list(input.sexpr);
+                console.log("DFT is expr", input);
+                DFT_list(input.sexpr, other);
             }
         }
     };
     
-    var DFT_list = function(input) {
-        for(var i = 0; i <= input.length; i++){
-            DFT(input[i]);
+    var DFT_list = function(input, other) {
+        console.log("DFT_List: ", input, " length ", input.length, "other ", other);
+        for(var i = 0; i < input.length; i++){
+            DFT(input[i], other);
         }
     };
     
@@ -439,10 +496,11 @@
             ctx.clearRect(0, 0, canvas.width, canvas.height); // clear screen
             visualize(ast);
             springList(ast);
+            DFT_list(ast);
             updateVelocityList(ast);
             updatePositionList(ast);
         }
-        window.setInterval(drawCall, 50);
+        window.setInterval(drawCall, 5);
 
 
 /*
@@ -462,16 +520,18 @@ console.log("------   frame 2  ------");
             springList(ast);
             updateVelocityList(ast);
             updatePositionList(ast);
-/*     
+     
 console.log("------   frame 3  ------");
             ctx.clearRect(0, 0, canvas.width, canvas.height); // clear screen
             visualize(ast);
             springList(ast);
             updateVelocityList(ast);
             updatePositionList(ast);
- */
-           
-        var final_res = interpret(ast);
+*/ 
+
+        DFT_list(ast);
+
+        var final_res = interpret(ast); // core
         console.log("Final Result: ", final_res);
 
         //drawAll();

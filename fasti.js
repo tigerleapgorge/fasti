@@ -235,7 +235,6 @@
             
             drawRect(input.pos);
             drawText(input.value, input.pos);
-
             
             if (input.type === "expr") {
                 visualizeList(input.sexpr, position.add(deltaDownVector) );
@@ -251,16 +250,7 @@
         var d = inputB.pos.subtract(inputA.pos);
         var displacement = d.magnitude() - springLength; // core
         var direction = d.normalize();
-        
-        console.log("inputA.pos ", inputA.pos);
-        console.log("inputB.pos ", inputB.pos);
-        console.log("d ", d);
-        console.log("+ d.magnitude ", d.magnitude());
-        console.log("+ displacement", displacement);
-        console.log("d.normalize ", d.normalize);
-        console.log("direction ", direction);
-        
-        
+
         if (inputA.a === undefined){
             console.log("Creat new A acceleration");
             inputA.a = new vector(0, 0);
@@ -270,17 +260,10 @@
             inputB.a = new vector(0, 0);
         }
         
-        console.log("inputA.a before ", inputA.a);
-        console.log("inputB.a before ", inputB.a);
-        
         var delta_a = direction.multiply(springConstant * displacement * 0.5 )
-        console.log("delta_a ", delta_a)
-        
+
         inputA.a = inputA.a.add( delta_a );  // core
         inputB.a = inputB.a.add( delta_a.neg() ); // core
-       
-        console.log("inputA.a after", inputA.a);
-        console.log("inputB.a after", inputB.a);
 
         return;
     };
@@ -290,7 +273,7 @@
 
     var updateVelocity = function(input) {
         console.log("updateVelocity");
-        console.log("updateVelocity input", input);
+
         if(input instanceof Array) {
             updateVelocityList(input);
         } else {
@@ -304,11 +287,7 @@
                 
                 input.v = input.v.multiply(0.9); // damping
                 input.a = input.a.multiply(0.9); // 2-3% extra acceleration
-                
-                 
-                console.log("Update Velocity: ", input);
-                console.log("Update Velocity acceleration: ", input.a);
-                console.log("Update Velocity velocity: ", input.v);
+
                 if(input.type === "expr") { // is paren atom
                     updateVelocityList(input.sexpr); // DFS
                 }
@@ -336,7 +315,6 @@
                 input.pos = input.pos.add( input.v.multiply(timestep) ); // Core 
                 if(input.type === "expr") { // is paren atom
                     updatePositionList(input.sexpr); // DFS
-                    
                 }
             }
         }
@@ -389,13 +367,6 @@
         var d_magSquared = d.magnitudeSquared(); // denominator
         var direction = d.normalize(); // unit length
         
-        console.log("inputA.pos ", inputA.pos);
-        console.log("inputB.pos ", inputB.pos);
-        console.log("d ", d);
-        console.log("+ d_magSquared", d_magSquared);
-        console.log("direction ", direction);
-        
-        
         if (inputA.a === undefined){
             console.log("Creat new A acceleration applyRepulsion ");
             inputA.a = new vector(0, 0);
@@ -404,18 +375,12 @@
             console.log("Creat new B acceleration applyRepulsion ");
             inputB.a = new vector(0, 0);
         }
-        
-        console.log("inputA.a before ", inputA.a);
-        console.log("inputB.a before ", inputB.a);
-        
+
         var delta_a = direction.multiply(0.5 * chargeConstant / d_magSquared )
         console.log("delta_a ", delta_a)
         
         inputA.a = inputA.a.add( delta_a.neg() );  // core
         inputB.a = inputB.a.add( delta_a ); // core
-       
-        console.log("inputA.a after", inputA.a);
-        console.log("inputB.a after", inputB.a);
 
         return;
     }
@@ -434,8 +399,7 @@
                     applyRepulsion(input, other);
                 }
             }
-            
-            
+
             if(input.type === "expr") {
                 console.log("DFT is expr", input);
                 DFT_list(input.sexpr, other);

@@ -467,71 +467,25 @@
         console.log("type of ast: ", typeof ast);
         console.log("ast is array: ", ast instanceof Array);
 
-/*
-            ctx.clearRect(0, 0, canvas.width, canvas.height); // clear screen
-            visualize(ast);
-            springList(ast);
-            
-            console.log("----------------------");
-            updateVelocityList(ast);
-            updatePositionList(ast);
-            console.log("++++++++++++++++++++++");
-*/
-
-  
-/*
-        for(var f=0; f< 2; f++){
-            console.log("------   frame   ------", f);
-            ctx.clearRect(0, 0, canvas.width, canvas.height); // clear screen
-            visualize(ast);
-            springList(ast);
-            updateVelocityList(ast);
-            updatePositionList(ast);
-        }
-*/
-
 
         var frame = 0;
         var drawCall = function() { // core
-            
+            if(frame > 100) {
+                console.log("cleaInterval", drawIntervalID);
+                window.clearInterval(drawIntervalID);
+            }
             console.log("drawCall", frame++);
             ctx.clearRect(0, 0, canvas.width, canvas.height); // clear screen
+            drawText("Frame: " + frame, {x:30, y:30}); // frame counter upper left
             visualize(ast);
             springList(ast);
             DFT_list(ast);
             updateVelocityList(ast);
             updatePositionList(ast);
+
         }
-        window.setInterval(drawCall, 5);
+        var drawIntervalID = window.setInterval(drawCall, 5);
 
-
-/*
-console.log("------   frame 1  ------");
-            ctx.clearRect(0, 0, canvas.width, canvas.height); // clear screen
-            console.log("before visualize", ast);
-            visualize(ast);
-            console.log("before springlist", ast);
-            springList(ast);
-            console.log("after springlist before updateVelocity", ast);
-            updateVelocityList(ast);
-            updatePositionList(ast);
-
-console.log("------   frame 2  ------");
-            ctx.clearRect(0, 0, canvas.width, canvas.height); // clear screen
-            visualize(ast);
-            springList(ast);
-            updateVelocityList(ast);
-            updatePositionList(ast);
-     
-console.log("------   frame 3  ------");
-            ctx.clearRect(0, 0, canvas.width, canvas.height); // clear screen
-            visualize(ast);
-            springList(ast);
-            updateVelocityList(ast);
-            updatePositionList(ast);
-*/ 
-
-        DFT_list(ast);
 
         var final_res = interpret(ast); // core
         console.log("Final Result: ", final_res);

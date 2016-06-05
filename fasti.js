@@ -92,7 +92,7 @@
         while( tokenList.length ) {
             var curToken = tokenList.shift();
             if(curToken === "("){ 
-                retArray.push( { type : "expr" , sexpr : parenthesize(tokenList) } ); // recursive
+                retArray.push( { type : "expr" , value : "()", sexpr : parenthesize(tokenList) } ); // recursive
             } else if(curToken === ")") {
                 return retArray;
             } else {
@@ -234,9 +234,8 @@
             }
             
             drawRect(input.pos);
-            if(input.type !== "expr") {
-                drawText(input.value, input.pos);
-            }
+            drawText(input.value, input.pos);
+
             
             if (input.type === "expr") {
                 visualizeList(input.sexpr, position.add(deltaDownVector) );

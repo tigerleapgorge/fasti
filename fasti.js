@@ -246,7 +246,7 @@
     };
 
     var springLength = 77;
-    var springConstant = 0.1; 
+    var springConstant = 1; 
    
     var applySpring = function(inputA, inputB) {
         var d = inputB.pos.subtract(inputA.pos);
@@ -286,7 +286,7 @@
         return;
     };
 
-    var timestep = 0.1; // Time Step -- super important
+    var timestep = 0.01; // Time Step -- super important
     var damping = 0.5;
 
     var updateVelocity = function(input) {
@@ -302,7 +302,9 @@
                     input.v = new vector(0,0);
                 }
                 input.v = input.v.add( input.a.multiply(timestep) ); // Core
-                input.v = input.v.multiply(damping); // reduce overall energy
+                
+                input.v = input.v.multiply(0.9); // damping
+                input.a = input.a.multiply(0.9); // 2-3% extra acceleration
                 
                  
                 console.log("Update Velocity: ", input);
@@ -379,7 +381,7 @@
         
     };
     
-    var chargeConstant = 10000; // same for now
+    var chargeConstant = 50000; // same for now
     
     var applyRepulsion = function(inputA, inputB){
         console.log("Apply Repulsion: ", inputA, inputB);

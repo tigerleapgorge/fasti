@@ -199,30 +199,24 @@
         }
     };
 
-    var visualizeList = function(input, position) {
+    var visualizeList = function(input, position) { // TODO: break up pos init from visualize
         var curPosition = position;
         for(var i = 0; i < input.length; i++){
-            //console.log("visualizeList ", curPosition);
             visualize(input[i], curPosition);
             curPosition = curPosition.add(deltaRightVector);
         }
         return;
     };
 
-    var visualize = function(input, position) {
-        //console.log("In visualize");
+    var visualize = function(input, position) { // TODO: break up pos init from visualize
         if (position === undefined) {
-            //console.log("Vis no position");
             return visualize(input, new vector(canvas.width/2,  canvas.height/8) );
         } else if (input === undefined) {
-            //console.log("Vis no input");
             return;
         } else if (input instanceof Array) {
-            //console.log("Vis Array");
             visualizeList(input, position);
             return;
         } else { 
-            //console.log("Vis Else", input.pos, position);
             if (input.pos === undefined) {
                 input.pos = new vector(position.x, position.y);
             }
@@ -263,7 +257,7 @@
     };
 
     var timestep = 0.01; // Time Step -- super important
-    var damping = 0.5;
+    var damping = 0.9;
 
     var updateVelocity = function(input) {
         console.log("updateVelocity");
@@ -279,8 +273,8 @@
                 }
                 input.v = input.v.add( input.a.multiply(timestep) ); // Core
                 
-                input.v = input.v.multiply(0.9); // damping
-                input.a = input.a.multiply(0.9); // 2-3% extra acceleration
+                input.v = input.v.multiply(damping); // damping
+                input.a = input.a.multiply(damping); // ~2-3% surplus acc
 
                 if(input.type === "expr") { // is paren atom
                     updateVelocityList(input.sexpr); // DFS
@@ -322,34 +316,21 @@
     
     
     var springList = function(input, prev) {
-        //console.log("springList");
-        if (input === undefined ) {
-            //console.log("springList NO input");
-            return;
-        } else if ( !(input instanceof Array) ) {
-            //console.log("springList Not Array");
-            return;
-        } else {
-            //console.log("input.length: ", input.length);
-            if(prev !== undefined){
-                for(var i = 0; i < input.length; i++) {
-                    applySpring(input[i], prev);
-                }
-            }
-            
-            for(var i = 1; i < input.length; i++) {
-                //console.log("springList action: ", input[i-1]);
-                applySpring(input[i-1], input[i-0]);
-            }
-            
+        if(prev !== undefined){ // apply spring to parent "expr" node
             for(var i = 0; i < input.length; i++) {
-                //console.log("springList Recurse: ", input[i]);
-                if (input[i].type === "expr") {
-                    springList(input[i].sexpr, input[i]);
-                }
+                applySpring(input[i], prev);
             }
         }
-        
+            
+        for(var i = 1; i < input.length; i++) {
+            applySpring(input[i-1], input[i-0]);
+        }
+            
+        for(var i = 0; i < input.length; i++) {
+            if (input[i].type === "expr") {
+                springList(input[i].sexpr, input[i]);
+            }
+        }
     };
     
     var chargeConstant = 50000; // same for now
@@ -380,25 +361,22 @@
     }
     
     var DFT = function(input, other) {
-        console.log("DFT: ", input);
-        if (input instanceof Array) {
-            DFT_list(input, other);
+        // For each node, transverse AST again and apply 
+        if(other === undefined) {
+            console.log("Second round");
+            DFT_list(ast, input); // O(N^2)
         } else {
-            // For each node, transverse AST and apply 
-            if(other === undefined) {
-                console.log("Second round");
-                DFT_list(ast, input); // O(N^2)
-            } else {
-                if(input !== other){
-                    applyRepulsion(input, other);
-                }
-            }
-
-            if(input.type === "expr") {
-                console.log("DFT is expr", input);
-                DFT_list(input.sexpr, other);
+            if(input !== other){
+                applyRepulsion(input, other);
             }
         }
+
+        if(input.type === "expr") {
+            console.log("DFT is expr", input);
+            DFT_list(input.sexpr, other); // recurse
+        }
+
+        return;
     };
     
     var DFT_list = function(input, other) {
@@ -406,6 +384,7 @@
         for(var i = 0; i < input.length; i++){
             DFT(input[i], other);
         }
+        return;
     };
     
 /*******                Main Loop                      ******/
@@ -446,15 +425,14 @@
             if(frame < 80) { // Second Method - stop
                 window.requestAnimationFrame(drawCall);
             }
-            
+            return;
         }
         //var drawIntervalID = window.setInterval(drawCall, 5); // First method start (2nd arg ms)
         drawCall(); // Second Method - start
 
         var final_res = interpret(ast); // core
         console.log("Final Result: ", final_res);
-
-
+        return;
     }
 
     document.addEventListener('DOMContentLoaded', main, false); // start when ready

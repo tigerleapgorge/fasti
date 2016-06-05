@@ -71,12 +71,6 @@
         ctx.fillRect(position.x, position.y, 20, 20);
 
     }
-
-    function drawAll(){ // draw loop
-        ctx.clearRect(0, 0, canvas.width, canvas.height); // clear screen
-
-		requestAnimationFrame(drawAll); // loop
-    }
     
 /*******                Parser                      ******/
     var categorize = function(curToken){
@@ -433,10 +427,12 @@
 
         var frame = 0;
         var drawCall = function() { // core
-            if(frame > 100) {
+            /*
+            if(frame > 120) { // First method stop
                 console.log("cleaInterval", drawIntervalID);
                 window.clearInterval(drawIntervalID);
             }
+            */
             console.log("drawCall", frame++);
             ctx.clearRect(0, 0, canvas.width, canvas.height); // clear screen
             drawText("Frame: " + frame, {x:30, y:30}); // frame counter upper left
@@ -446,15 +442,20 @@
             updateVelocityList(ast);
             updatePositionList(ast);
 
+            
+            if(frame < 80) { // Second Method - stop
+                window.requestAnimationFrame(drawCall);
+            }
+            
         }
-        var drawIntervalID = window.setInterval(drawCall, 5);
-
+        //var drawIntervalID = window.setInterval(drawCall, 5); // First method start (2nd arg ms)
+        drawCall(); // Second Method - start
 
         var final_res = interpret(ast); // core
         console.log("Final Result: ", final_res);
 
-        //drawAll();
+
     }
-    //setInterval(drawAll, 16);  // run faster for debugging
+
     document.addEventListener('DOMContentLoaded', main, false); // start when ready
 })   ();

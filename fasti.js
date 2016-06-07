@@ -157,7 +157,10 @@
 
     var interpretList = function(input, context) {
         console.log("INTERPRET LIST: ", input);
-        if (input.length > 0 && input[0].value in special) {
+        if (context === undefined) {
+            console.log("no context: ");
+            return interpretList(input, new Context(library) )
+        } else if (input.length > 0 && input[0].value in special) {
             console.log("is special: ", input[0]);
             var special_return = special[input[0].value](input, context);
             console.log("special_return", special_return);
@@ -181,13 +184,7 @@
     
     var interpret = function(input, context) {
         console.log("INTERPRET: ", input);
-        if (context === undefined) {
-            console.log("no context: ");
-            return interpret(input, new Context(library) )
-        } else if (input instanceof Array) {
-            console.log("is Array: ", input);
-            return interpretList(input, context); // Old way
-        } else if (input.type === "expr") {
+        if (input.type === "expr") {
             console.log("is Expr obj: ", input);
             return interpretList(input.sexpr, context); // New way
         } else if (input.type === "identifier") {
@@ -422,7 +419,7 @@
             updatePositionList(ast);
 
             
-            if(frame < 80) { // Second Method - stop
+            if(frame < 1) { // Second Method - stop
                 window.requestAnimationFrame(drawCall);
             }
             return;
@@ -430,8 +427,8 @@
         //var drawIntervalID = window.setInterval(drawCall, 5); // First method start (2nd arg ms)
         drawCall(); // Second Method - start
 
-        var final_res = interpret(ast); // core
-        console.log("Final Result: ", final_res);
+        var final_res = interpretList(ast); // core - start with array
+        console.log(">>> Final Result: ", final_res);
         return;
     }
 

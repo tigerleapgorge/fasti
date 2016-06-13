@@ -6,7 +6,7 @@
     var ctx = canvas.getContext("2d");
 /*******                Data                     ******/
     //var sourceCode = "( ( lambda ( a b ) (+ a b) ) 8 55 )";
-    var sourceCode = "( ( lambda (x) x) 3)";
+    var sourceCode = "( ( lambda (x) x ) 3 )";
     //var sourceCode = "(+ 3 5)";
     //var sourceCode = "(1 2 3)";
     var tokenArray = [];
@@ -125,57 +125,39 @@
 /*******                Interpreter                      ******/
     var special = {
         if : function(input, context) {
-                console.log("If: input[1]", input[1] );
             if ( interpret( input[1], context ) ) {
-                console.log("True: input[2]", input[2] );
                 return interpret( input[2], context );
             } else {
-                console.log("False: input[3]", input[3] );
                 return interpret( input[3], context );
             }
         } , 
         lambda : function(input, context) {
             return function() {
-                console.log("lambda arguments: ", arguments);
                 var lambdaArguments = arguments;
-                // .value is added to get around the array encapsulation
-                // TODO: change to foreach and ABSTRACT to a seperate function
-                //       place new function near interpretList to make Expr
-                //       processing easier
                 var lambdaScope = input[1].sexpr.reduce( 
                         function(acc, x, i) {
                             acc[x.value] = lambdaArguments[i];
                             return acc;
                             }, {}                    )
                 var newContext = new Context(lambdaScope, context);
-                var lambda_res = interpret(input[2], newContext);
-                console.log("lambda_res; ", lambda_res);
-                return lambda_res;
+                return interpret(input[2], newContext);
             }
         }
     };
 
     var interpretList = function(input, context) {
-        console.log("INTERPRET LIST: ", input);
         if (context === undefined) {
-            console.log("no context: ");
-            return interpretList(input, new Context(library) )
-        } else if (input.length > 0 && input[0].value in special) {
-            console.log("is special: ", input[0]);
-            var special_return = special[input[0].value](input, context);
-            console.log("special_return", special_return);
-            return special_return;
+            return interpretList(input, new Context(library) ); // load lib
+        } else if (input.length > 0 && input[0].value in special) { // "if" and "lambda" - control flow
+            return special[input[0].value](input, context);
         } else { // non-special form
-            console.log("Not Special input:", input);
             var list = input.map( // interpret every node in the list
                 function(x) {
                     var map_res = interpret(x, context);
                     return map_res; 
                 }               );
-            if (list[0] instanceof Function) { // intrinsic JS function
-                var apply_result = list[0].apply(undefined, list.slice(1)); // apply: each list element becomes an actual arg 
-                console.log("apply_result: ", apply_result);
-                return apply_result;
+            if (list[0] instanceof Function) { // apply JS function
+                return list[0].apply(undefined, list.slice(1)); // apply: each list element becomes an actual arg 
             } else {
                 return list;
             }
@@ -183,15 +165,11 @@
     };
     
     var interpret = function(input, context) {
-        console.log("INTERPRET: ", input);
         if (input.type === "expr") {
-            console.log("is Expr obj: ", input);
             return interpretList(input.sexpr, context); // New way
         } else if (input.type === "identifier") {
-            console.log("is identifier: ", input);
             return context.get(input.value);
         } else if (input.type === "number") {
-            console.log("is number: ", input);
             return input.value;
         }
     };

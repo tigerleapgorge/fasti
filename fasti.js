@@ -125,35 +125,35 @@
 /*******                Interpreter                      ******/
     var special = {
         if : function(input, context) {
-            if ( interpret( input[1], context ) ) {
-                return interpret( input[2], context );
+            if ( interpret( input[1], context ) ) { // Recurse
+                return interpret( input[2], context ); // Recurse
             } else {
-                return interpret( input[3], context );
+                return interpret( input[3], context ); // Recurse
             }
         } , 
         lambda : function(input, context) {
             return function() {
                 var lambdaArguments = arguments;
-                var lambdaScope = input[1].sexpr.reduce( 
+                var lambdaScope = input[1].sexpr.reduce( // construct new scope
                         function(acc, x, i) {
                             acc[x.value] = lambdaArguments[i];
                             return acc;
-                            }, {}                    )
+                            }, {}                      )
                 var newContext = new Context(lambdaScope, context);
-                return interpret(input[2], newContext);
+                return interpret(input[2], newContext); // Recurse
             }
         }
     };
 
     var interpretList = function(input, context) {
         if (context === undefined) {
-            return interpretList(input, new Context(library) ); // load lib
+            return interpretList(input, new Context(library) ); // Recurse -- load lib
         } else if (input.length > 0 && input[0].value in special) { // "if" and "lambda" - control flow
             return special[input[0].value](input, context);
         } else { // non-special form
             var list = input.map( // interpret every node in the list
                 function(x) {
-                    var map_res = interpret(x, context);
+                    var map_res = interpret(x, context); // Recurse
                     return map_res; 
                 }               );
             if (list[0] instanceof Function) { // apply JS function
@@ -165,15 +165,16 @@
     };
     
     var interpret = function(input, context) {
-        if (input.type === "expr") {
-            return interpretList(input.sexpr, context); // New way
-        } else if (input.type === "identifier") {
+        if (input.type === "expr") { // Expression
+            return interpretList(input.sexpr, context); // Recurse
+        } else if (input.type === "identifier") { // Variable
             return context.get(input.value);
-        } else if (input.type === "number") {
+        } else if (input.type === "number") { // Literal
             return input.value;
         }
     };
 
+/*******                Visualizer                      ******/
     var visualizeList = function(input, position) { // TODO: break up pos init from visualize
         var curPosition = position;
         for(var i = 0; i < input.length; i++){

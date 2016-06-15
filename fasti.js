@@ -394,8 +394,8 @@
             visualize(ast);
             springList(ast);
             DFT_list(ast);
-            updateVelocityList(ast);
             updatePositionList(ast);
+            updateVelocityList(ast);
 
             
             if(frame < 1) { // Second Method - stop

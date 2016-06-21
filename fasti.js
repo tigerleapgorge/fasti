@@ -362,6 +362,25 @@
         }
         return;
     };
+
+    function* processAtom(input) {
+        yield input;
+        console.log("processAtom : ", input ); // print shit
+
+        if(input.type === "expr") {
+            yield* processList(input.sexpr);
+        }
+        return;
+    };
+
+    function* processList(input) {
+        yield input;
+        for(var i = 0; i < input.length; i++){
+            console.log("processing list : ", i, input[i] );
+            yield* processAtom(input[i]);
+        }
+        return;
+    };
     
 /*******                Main Loop                      ******/
     function main(){
@@ -408,6 +427,19 @@
 
         var final_res = interpretList(ast); // core - start with array
         console.log(">>> Final Result: ", final_res);
+
+
+        var gen = processList(ast);
+
+        var genOne = gen.next();
+        console.log("gen One: ", genOne);
+
+        var genTwo = gen.next();
+        console.log("gen Two: ", genTwo);
+
+        gen.next();
+        gen.next();
+        gen.next();
         return;
     }
 

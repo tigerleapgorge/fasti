@@ -12,7 +12,7 @@
     var tokenArray = [];
     var ast = [];
 
-/*******                Vector                      ******/
+/*******         Vector Library                      ******/
     function vector(x, y) {
         if ( !(this instanceof vector) ) { // dont need new
            var new_vec = new vector(x, y);
@@ -126,11 +126,17 @@
     var interpretList = function(input, context) {
         if (context === undefined) { // first time in, create primative library
             return interpretList(input, new Context(library) ); // Recurse -- load lib
-        } else if (input[0].value === "if") { // special form 
-            if ( interpret( input[1], context ) ) { // Recurse
-                return interpret( input[2], context ); // Recurse consequence
+        } else if (input[0].value === "if") { // special form
+            input[1].result = interpret( input[1], context );
+            // yield 
+            if ( input[1].result ) { // Recurse
+                input[2].result = interpret( input[2], context ); // Recurse consequence
+                // yield
+                return input[2].result;
             } else {
-                return interpret( input[3], context ); // Recurse alternative
+                input[3].result = interpret( input[3], context ); // Recurse alternative
+                // yield
+                return input[3].result;
             }
         } else if (input[0].value === "lambda") { // special form
             return function() {
@@ -149,7 +155,7 @@
                     var map_res = interpret(x, context); // Recurse
                     return map_res; 
                 }               );
-            if (list[0] instanceof Function) { // apply JS function
+            if (list[0] instanceof Function) { // apply JS function <========== THIS NEEDS TO CHANGE FOR GENERATOR
                 return list[0].apply(undefined, list.slice(1)); // apply: each list element becomes an actual arg 
             } else {
                 return list;
@@ -159,11 +165,19 @@
     
     var interpret = function(input, context) {
         if (input.type === "expr") { // Expression
-            return interpretList(input.sexpr, context); // Recurse
+             input.result = interpretList(input.sexpr, context); // Recurse
+             // yield
+             return input.result;
         } else if (input.type === "identifier") { // Variable
-            return context.get(input.value);
+            input.result = context.get(input.value);
+            // yield
+            return input.result;
         } else if (input.type === "number") { // Literal
-            return input.value;
+            input.result = input.value;
+            // yield
+            return input.result;
+        } else {
+            console.log("Warning: interpret can not handle atom type", input.type);
         }
     };
 
@@ -192,6 +206,10 @@
             
             drawRect(input.pos);
             drawText(input.value, input.pos);
+
+            if (input.result !== undefined) {
+                drawText(input.result, input.pos.add( new vector(0,22) ));
+            }
             
             if (input.type === "expr") {
                 visualizeList(input.sexpr, position.add(deltaDownVector) );
@@ -391,7 +409,6 @@
             updateVelocityList(ast);
 
             
-            if(frame < 1) { // Second Method - stop
                 window.requestAnimationFrame(drawCall);
             }
             return;

@@ -123,15 +123,16 @@
     };
 
 /*******                Interpreter                      ******/
-    var special = {
-        if : function(input, context) {
+    var interpretList = function(input, context) {
+        if (context === undefined) { // first time in, create primative library
+            return interpretList(input, new Context(library) ); // Recurse -- load lib
+        } else if (input[0].value === "if") { // special form 
             if ( interpret( input[1], context ) ) { // Recurse
-                return interpret( input[2], context ); // Recurse
+                return interpret( input[2], context ); // Recurse consequence
             } else {
-                return interpret( input[3], context ); // Recurse
+                return interpret( input[3], context ); // Recurse alternative
             }
-        } , 
-        lambda : function(input, context) {
+        } else if (input[0].value === "lambda") { // special form
             return function() {
                 var lambdaArguments = arguments;
                 var lambdaScope = input[1].sexpr.reduce( // construct new scope
@@ -142,14 +143,6 @@
                 var newContext = new Context(lambdaScope, context);
                 return interpret(input[2], newContext); // Recurse
             }
-        }
-    };
-
-    var interpretList = function(input, context) {
-        if (context === undefined) {
-            return interpretList(input, new Context(library) ); // Recurse -- load lib
-        } else if (input.length > 0 && input[0].value in special) { // "if" and "lambda" - control flow
-            return special[input[0].value](input, context);
         } else { // non-special form
             var list = input.map( // interpret every node in the list
                 function(x) {
@@ -362,25 +355,6 @@
         }
         return;
     };
-
-    function* processAtom(input) {
-        yield input;
-        console.log("processAtom : ", input ); // print shit
-
-        if(input.type === "expr") {
-            yield* processList(input.sexpr);
-        }
-        return;
-    };
-
-    function* processList(input) {
-        yield input;
-        for(var i = 0; i < input.length; i++){
-            console.log("processing list : ", i, input[i] );
-            yield* processAtom(input[i]);
-        }
-        return;
-    };
     
 /*******                Main Loop                      ******/
     function main(){
@@ -428,8 +402,8 @@
         var final_res = interpretList(ast); // core - start with array
         console.log(">>> Final Result: ", final_res);
 
-
-        var gen = processList(ast);
+/*
+        var gen = interpretList(ast);
 
         var genOne = gen.next();
         console.log("gen One: ", genOne);
@@ -440,6 +414,7 @@
         gen.next();
         gen.next();
         gen.next();
+*/
         return;
     }
 

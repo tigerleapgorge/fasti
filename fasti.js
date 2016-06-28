@@ -85,7 +85,7 @@
         var retArray = [];
         while( tokenList.length ) {
             var curToken = tokenList.shift();
-            if(curToken === "("){ 
+            if(curToken === "(") { 
                 retArray.push( { type : "expr" , value : "()", sexpr : parenthesize(tokenList) } ); // recursive
             } else if(curToken === ")") {
                 return retArray;
@@ -139,7 +139,7 @@
                 return input[3].result;
             }
         } else if (input[0].value === "lambda") { // special form
-            return function() {
+            return function() { // RETURN A FUNCTION
                 var lambdaArguments = arguments;
                 var lambdaScope = input[1].sexpr.reduce( // construct new scope
                         function(acc, x, i) {
@@ -409,6 +409,7 @@
             updateVelocityList(ast);
 
             
+            if(frame < 2) { // Second Method - stop
                 window.requestAnimationFrame(drawCall);
             }
             return;

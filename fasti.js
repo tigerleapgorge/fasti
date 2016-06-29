@@ -190,17 +190,25 @@
 
     var visualize = function(input, position) { // TODO: break up pos init from visualize
         if (position === undefined) {
-            return visualize(input, new vector(canvas.width/2,  canvas.height/8) );
+            return visualize(input, new vector(canvas.width/5,  canvas.height/5) );
         } else if (input === undefined) {
             return;
         } else if (input instanceof Array) {
             visualizeList(input, position);
             return;
-        } else { 
+        } else {
+
+            // Init Position, Velocity, Acceleration
             if (input.pos === undefined) {
                 input.pos = new vector(position.x, position.y);
             }
-            
+            if (input.a === undefined) {
+                input.a = new vector(0, 0);
+            }
+            if (input.v === undefined) {
+	            input.v = new vector(0,0);
+            }
+
             drawRect(input.pos);
             drawText(input.value, input.pos);
 
@@ -217,73 +225,42 @@
 
     var springLength = 77;
     var springConstant = 1; 
-   
+
     var applySpring = function(inputA, inputB) {
         var d = inputB.pos.subtract(inputA.pos);
-        var displacement = d.magnitude() - springLength; // core
+        var displacement = d.magnitude() - springLength;
         var direction = d.normalize();
 
-        if (inputA.a === undefined){
-            console.log("Creat new A acceleration");
-            inputA.a = new vector(0, 0);
-        }
-        if (inputB.a === undefined){
-            console.log("Creat new B acceleration");
-            inputB.a = new vector(0, 0);
-        }
-        
         var delta_a = direction.multiply(springConstant * displacement * 0.5 )
 
-        inputA.a = inputA.a.add( delta_a );  // core
+        inputA.a = inputA.a.add( delta_a );       // core
         inputB.a = inputB.a.add( delta_a.neg() ); // core
-
-        return;
     };
 
     var timestep = 0.01; // Time Step -- super important
     var damping = 0.9;
 
     var updateVelocity = function(input) {
-        console.log("updateVelocity");
+        input.v = input.v.add( input.a.multiply(timestep) ); // Core
 
-        if(input instanceof Array) {
-            updateVelocityList(input);
-        } else {
-            if(input.a === undefined){
-                console.log("updateVelocity lack acceleration", input);
-            } else {
-                if(input.v === undefined) { // if veloctiy don't exist, initialize it
-                    input.v = new vector(0,0);
-                }
-                input.v = input.v.add( input.a.multiply(timestep) ); // Core
-                
-                input.v = input.v.multiply(damping); // damping
-                input.a = input.a.multiply(damping); // ~2-3% surplus acc
+        input.v = input.v.multiply(damping); // damping
+        input.a = input.a.multiply(damping); // ~2-3% surplus acceleration
 
-                if(input.type === "expr") { // is paren atom
-                    updateVelocityList(input.sexpr); // DFS
-                }
-            }
+        if(input.type === "expr") {
+            updateVelocityList(input.sexpr); // Recurse Sub-Expression
         }
     };
     var updateVelocityList = function(input) {
-        console.log("updateVelocityList");
         for(var i = 0; i < input.length; i++){
             updateVelocity(input[i]);
         }
     };
 
     var updatePosition = function(input) {
-        if(input instanceof Array) {
-            updatePositionList(input);
-        } else {
-            if (input.v !== undefined) { // make sure velocity exist
-                input.pos = input.pos.add( input.v.multiply(timestep) ); // Core
+        input.pos = input.pos.add( input.v.multiply(timestep) ); // Update pos += v*t
 
-                if(input.type === "expr") {
-                    updatePositionList(input.sexpr); // recurse sub-expression
-                }
-            }
+        if(input.type === "expr") {
+            updatePositionList(input.sexpr); // Recurse Sub-Expression
         }
     };
     var updatePositionList = function(input) {
@@ -291,22 +268,22 @@
             updatePosition(input[i]);
         }
     };
+
     
-    
-    var springList = function(input, prev) {
-        if(prev !== undefined){ // apply spring to parent "expr" node
+    var springList = function(input, parent) {
+        if(parent !== undefined){ // firest entry no parent
             for(var i = 0; i < input.length; i++) {
-                applySpring(input[i], prev);
+                applySpring(input[i], parent); // apply spring from parent to each child
             }
         }
-            
+
         for(var i = 1; i < input.length; i++) {
-            applySpring(input[i-1], input[i-0]);
+            applySpring(input[i-1], input[i-0]); // horizontal spring between children
         }
             
         for(var i = 0; i < input.length; i++) {
             if (input[i].type === "expr") {
-                springList(input[i].sexpr, input[i]);
+                springList(input[i].sexpr, input[i]); // Recurse - remember parent
             }
         }
     };
@@ -317,13 +294,6 @@
         var distance = inputB.pos.subtract(inputA.pos); // TODO: when input1 and input2 pos overlap
         var distance_magSquared = distance.magnitudeSquared(); // denominator
         var direction = distance.normalize(); // unit length
-        
-        if (inputA.a === undefined){
-            inputA.a = new vector(0, 0);
-        }
-        if (inputB.a === undefined){
-            inputB.a = new vector(0, 0);
-        }
 
         var delta_acc = direction.multiply(0.5 * chargeConstant / (distance_magSquared + 50 ) )
         inputA.a = inputA.a.add( delta_acc.neg() );  // Apply acceleration to A
@@ -354,9 +324,9 @@
         return;
     };
 
-/*******                Main Loop                      ******/    
-/*******                Main Loop                      ******/
-/*******                Main Loop                      ******/
+/*******                Main                ******/    
+/*******                Main                ******/
+/*******                Main                ******/
 
     function main(){
         var sourceCode = "( ( lambda ( a b c ) (+ a ( + b c) ) ) 1 2 3 )";
@@ -382,11 +352,13 @@
             console.log("drawCall", frame++); // top left frames
             ctx.clearRect(0, 0, canvas.width, canvas.height); // clear screen
             drawText("Frame: " + frame, {x:30, y:30}); // frame counter upper left
-            visualize(ast);
+
+            visualize(ast); // init p,v,a and draw
             springList(ast); // O(N)
             repelList(ast);  // O(N^2)
             updatePositionList(ast);
             updateVelocityList(ast);
+
             /*
             if(frame < maxFrame) { // 2nd Method - Stop
                 window.requestAnimationFrame(drawCall);

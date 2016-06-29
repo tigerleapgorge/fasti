@@ -5,8 +5,8 @@
     var canvas = document.getElementById("myCanvas");
     var ctx = canvas.getContext("2d");
 /*******                Data                     ******/
-    //var sourceCode = "( ( lambda ( a b ) (+ a b) ) 8 55 )";
-    var sourceCode = "( ( lambda (x) x ) 3 )";
+    var sourceCode = "( ( lambda ( a b c ) (+ a b c) ) 1 2 3 )";
+    //var sourceCode = "( ( lambda (x) x ) 3 )";
     //var sourceCode = "(+ 3 5)";
     //var sourceCode = "(1 2 3)";
     var tokenArray = [];
@@ -338,7 +338,7 @@
             inputB.a = new vector(0, 0);
         }
 
-        var delta_a = direction.multiply(0.5 * chargeConstant / d_magSquared )
+        var delta_a = direction.multiply(0.5 * chargeConstant / (d_magSquared + 50 ) )
         console.log("delta_a ", delta_a)
         
         inputA.a = inputA.a.add( delta_a.neg() );  // core

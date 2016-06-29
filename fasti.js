@@ -202,11 +202,11 @@
             if (input.pos === undefined) {
                 input.pos = new vector(position.x, position.y);
             }
-            if (input.a === undefined) {
-                input.a = new vector(0, 0);
-            }
             if (input.v === undefined) {
 	            input.v = new vector(0,0);
+            }
+            if (input.a === undefined) {
+                input.a = new vector(0,0);
             }
 
             drawRect(input.pos);
@@ -223,23 +223,23 @@
         }
     };
 
-    var springLength = 77;
-    var springConstant = 1; 
+// Position
+    var timestep = 0.01; // Time Step -- super important
+    var updatePosition = function(input) {
+        input.pos = input.pos.add( input.v.multiply(timestep) ); // Update pos += v*t
 
-    var applySpring = function(inputA, inputB) {
-        var d = inputB.pos.subtract(inputA.pos);
-        var displacement = d.magnitude() - springLength;
-        var direction = d.normalize();
-
-        var delta_a = direction.multiply(springConstant * displacement * 0.5 )
-
-        inputA.a = inputA.a.add( delta_a );       // core
-        inputB.a = inputB.a.add( delta_a.neg() ); // core
+        if(input.type === "expr") {
+            updatePositionList(input.sexpr); // Recurse Sub-Expression
+        }
+    };
+    var updatePositionList = function(input) {
+        for(var i = 0; i < input.length; i++){
+            updatePosition(input[i]);
+        }
     };
 
-    var timestep = 0.01; // Time Step -- super important
+// Velocity
     var damping = 0.9;
-
     var updateVelocity = function(input) {
         input.v = input.v.add( input.a.multiply(timestep) ); // Core
 
@@ -256,20 +256,19 @@
         }
     };
 
-    var updatePosition = function(input) {
-        input.pos = input.pos.add( input.v.multiply(timestep) ); // Update pos += v*t
+// Hooke's law: F = -kX
+    var springLength = 77;
+    var springConstant = 1; 
+    var applySpring = function(inputA, inputB) {
+        var d = inputB.pos.subtract(inputA.pos);
+        var displacement = d.magnitude() - springLength;
+        var direction = d.normalize();
 
-        if(input.type === "expr") {
-            updatePositionList(input.sexpr); // Recurse Sub-Expression
-        }
-    };
-    var updatePositionList = function(input) {
-        for(var i = 0; i < input.length; i++){
-            updatePosition(input[i]);
-        }
-    };
+        var delta_a = direction.multiply(springConstant * displacement * 0.5 )
 
-    
+        inputA.a = inputA.a.add( delta_a );       // core
+        inputB.a = inputB.a.add( delta_a.neg() ); // core
+    };
     var springList = function(input, parent) {
         if(parent !== undefined){ // firest entry no parent
             for(var i = 0; i < input.length; i++) {
@@ -287,20 +286,20 @@
             }
         }
     };
-    
-    var chargeConstant = 50000; // same for now
-    
+
+
+// Coulomb's law: F = k q1 q2 / r^2
+    var chargeConstant = 50000; // k
     var applyRepulsion = function(inputA, inputB){
         var distance = inputB.pos.subtract(inputA.pos); // TODO: when input1 and input2 pos overlap
         var distance_magSquared = distance.magnitudeSquared(); // denominator
         var direction = distance.normalize(); // unit length
 
-        var delta_acc = direction.multiply(0.5 * chargeConstant / (distance_magSquared + 50 ) )
+        var delta_acc = direction.multiply(0.5 * chargeConstant / (distance_magSquared + 50 ) ) 
         inputA.a = inputA.a.add( delta_acc.neg() );  // Apply acceleration to A
         inputB.a = inputB.a.add( delta_acc );        // Apply acceleration to B
         return;
     }
-    
     var repelAtom = function(input, other) { // other holds first time transversal input
         if(other === undefined) {  // 1st transveral 
             repelList(ast, input); // transverse AST again for each node - O(N^2)
@@ -313,15 +312,12 @@
         if(input.type === "expr") {
             repelList(input.sexpr, other); // recurse
         }
-        return;
     };
-    
     var repelList = function(input, other) {
-        console.log("repelList: ", input, " length ", input.length, "other ", other);
         for(var i = 0; i < input.length; i++){
             repelAtom(input[i], other);
         }
-        return;
+
     };
 
 /*******                Main                ******/    

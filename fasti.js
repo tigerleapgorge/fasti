@@ -5,10 +5,7 @@
     var canvas = document.getElementById("myCanvas");
     var ctx = canvas.getContext("2d");
 /*******                Data                     ******/
-    var sourceCode = "( ( lambda ( a b c ) (+ a b c) ) 1 2 3 )";
-    //var sourceCode = "( ( lambda (x) x ) 3 )";
-    //var sourceCode = "(+ 3 5)";
-    //var sourceCode = "(1 2 3)";
+
     var tokenArray = [];
     var ast = [];
 
@@ -277,25 +274,19 @@
     };
 
     var updatePosition = function(input) {
-        console.log("updatePosition", input);
         if(input instanceof Array) {
             updatePositionList(input);
         } else {
             if (input.v !== undefined) { // make sure velocity exist
-                /*
-                if(input.pos === undefined) { // if veloctiy don't exist, initialize it
-                    input.pos = new vector(0,0);
-                }
-                */
-                input.pos = input.pos.add( input.v.multiply(timestep) ); // Core 
-                if(input.type === "expr") { // is paren atom
-                    updatePositionList(input.sexpr); // DFS
+                input.pos = input.pos.add( input.v.multiply(timestep) ); // Core
+
+                if(input.type === "expr") {
+                    updatePositionList(input.sexpr); // recurse sub-expression
                 }
             }
         }
     };
     var updatePositionList = function(input) {
-        console.log("updatePositionList", input);
         for(var i = 0; i < input.length; i++){
             updatePosition(input[i]);
         }
@@ -323,116 +314,97 @@
     var chargeConstant = 50000; // same for now
     
     var applyRepulsion = function(inputA, inputB){
-        console.log("Apply Repulsion: ", inputA, inputB);
-        
-        var d = inputB.pos.subtract(inputA.pos); // TODO: when input1 and input2 pos overlap
-        var d_magSquared = d.magnitudeSquared(); // denominator
-        var direction = d.normalize(); // unit length
+        var distance = inputB.pos.subtract(inputA.pos); // TODO: when input1 and input2 pos overlap
+        var distance_magSquared = distance.magnitudeSquared(); // denominator
+        var direction = distance.normalize(); // unit length
         
         if (inputA.a === undefined){
-            console.log("Creat new A acceleration applyRepulsion ");
             inputA.a = new vector(0, 0);
         }
         if (inputB.a === undefined){
-            console.log("Creat new B acceleration applyRepulsion ");
             inputB.a = new vector(0, 0);
         }
 
-        var delta_a = direction.multiply(0.5 * chargeConstant / (d_magSquared + 50 ) )
-        console.log("delta_a ", delta_a)
-        
-        inputA.a = inputA.a.add( delta_a.neg() );  // core
-        inputB.a = inputB.a.add( delta_a ); // core
-
+        var delta_acc = direction.multiply(0.5 * chargeConstant / (distance_magSquared + 50 ) )
+        inputA.a = inputA.a.add( delta_acc.neg() );  // Apply acceleration to A
+        inputB.a = inputB.a.add( delta_acc );        // Apply acceleration to B
         return;
     }
     
-    var DFT = function(input, other) {
-        // For each node, transverse AST again and apply 
-        if(other === undefined) {
-            console.log("Second round");
-            DFT_list(ast, input); // O(N^2)
-        } else {
+    var repelAtom = function(input, other) { // other holds first time transversal input
+        if(other === undefined) {  // 1st transveral 
+            repelList(ast, input); // transverse AST again for each node - O(N^2)
+        } else { // 2nd transversal - other holds current node
             if(input !== other){
-                applyRepulsion(input, other);
+                applyRepulsion(input, other); // apply electrostatic force
             }
         }
 
         if(input.type === "expr") {
-            console.log("DFT is expr", input);
-            DFT_list(input.sexpr, other); // recurse
+            repelList(input.sexpr, other); // recurse
         }
-
         return;
     };
     
-    var DFT_list = function(input, other) {
-        console.log("DFT_List: ", input, " length ", input.length, "other ", other);
+    var repelList = function(input, other) {
+        console.log("repelList: ", input, " length ", input.length, "other ", other);
         for(var i = 0; i < input.length; i++){
-            DFT(input[i], other);
+            repelAtom(input[i], other);
         }
         return;
     };
-    
+
+/*******                Main Loop                      ******/    
 /*******                Main Loop                      ******/
+/*******                Main Loop                      ******/
+
     function main(){
+        var sourceCode = "( ( lambda ( a b c ) (+ a ( + b c) ) ) 1 2 3 )";
+        //var sourceCode = "( ( lambda (x) x ) 3 )";
+        //var sourceCode = "(+ 3 5)";
+        //var sourceCode = "(1 2 3)";
+
         tokenArray = sourceCode.replace(/\(/g, " ( ")
-                               .replace(/\[/g, " [ ")
-                               .replace(/\]/g, " ] ")
                                .replace(/\)/g, " ) ")
                                .trim()
                                .split(/\s+/);
-        console.log(tokenArray);
-
         ast = parenthesize(tokenArray);
-        
-        console.log("ast ", ast);
-        console.log("type of ast: ", typeof ast);
-        console.log("ast is array: ", ast instanceof Array);
 
+        var maxFrame = 1000; // <= number of Frames before Visualization stops
 
         var frame = 0;
         var drawCall = function() { // core
-            /*
-            if(frame > 120) { // First method stop
-                console.log("cleaInterval", drawIntervalID);
+           
+            if(frame > maxFrame) { // 1st Method - Stop
                 window.clearInterval(drawIntervalID);
             }
-            */
-            console.log("drawCall", frame++);
+            
+            console.log("drawCall", frame++); // top left frames
             ctx.clearRect(0, 0, canvas.width, canvas.height); // clear screen
             drawText("Frame: " + frame, {x:30, y:30}); // frame counter upper left
             visualize(ast);
-            springList(ast);
-            DFT_list(ast);
+            springList(ast); // O(N)
+            repelList(ast);  // O(N^2)
             updatePositionList(ast);
             updateVelocityList(ast);
-
-            
-            if(frame < 2) { // Second Method - stop
+            /*
+            if(frame < maxFrame) { // 2nd Method - Stop
                 window.requestAnimationFrame(drawCall);
             }
+            */
             return;
         }
-        //var drawIntervalID = window.setInterval(drawCall, 5); // First method start (2nd arg ms)
-        drawCall(); // Second Method - start
+
+        var drawIntervalID = window.setInterval(drawCall, 5); // 1st Method Start (2nd arg in millisecond)
+        //drawCall(); // 2nd Method - Start
 
         var final_res = interpretList(ast); // core - start with array
         console.log(">>> Final Result: ", final_res);
 
-/*
-        var gen = interpretList(ast);
 
-        var genOne = gen.next();
-        console.log("gen One: ", genOne);
+        // var gen = interpretList(ast);
+        // gen.next();
 
-        var genTwo = gen.next();
-        console.log("gen Two: ", genTwo);
-
-        gen.next();
-        gen.next();
-        gen.next();
-*/
         return;
     }
 

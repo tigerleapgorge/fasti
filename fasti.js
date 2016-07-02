@@ -137,6 +137,7 @@
             }
         } else if (input[0].value === "lambda") { // special form
             return function() { // RETURN A FUNCTION
+                /*
                 var lambdaArguments = arguments;
                 var lambdaScope = input[1].sexpr.reduce( // construct new scope
                         function(acc, x, i) {
@@ -145,6 +146,15 @@
                             }, {}                      )
                 var newContext = new Context(lambdaScope, context);
                 return interpret(input[2], newContext); // Recurse
+                */
+                var formalArg = input[1].sexpr;
+                var actualArg = arguments;
+                var localEnv = {};
+                for(var i = 0; i < arguments.length; i++) {
+                    localEnv[formalArg[i].value] = actualArg[i]; // bind 
+                }
+                var localContext = new Context(localEnv, context); // chain it with previous Env
+                return interpret(input[2], localContext); // Recurse
             }
         } else { // non-special form
             var list = input.map( // interpret every node in the list
@@ -336,7 +346,7 @@
                                .split(/\s+/);
         ast = parenthesize(tokenArray);
 
-        var maxFrame = 1000; // <= number of Frames before Visualization stops
+        var maxFrame = 1; // <= number of Frames before Visualization stops
 
         var frame = 0;
         var drawCall = function() { // core

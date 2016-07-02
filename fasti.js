@@ -135,28 +135,15 @@
             return interpretList(input, new Context(library) ); // Recurse -- load lib
         } else if (input[0].value === "if") { // special form
             input[1].result = interpret( input[1], context );
-            // yield 
             if ( input[1].result ) { // Recurse
                 input[2].result = interpret( input[2], context ); // Recurse consequence
-                // yield
                 return input[2].result;
             } else {
                 input[3].result = interpret( input[3], context ); // Recurse alternative
-                // yield
                 return input[3].result;
             }
         } else if (input[0].value === "lambda") { // special form
             return function() { // RETURN A FUNCTION
-                /*
-                var lambdaArguments = arguments;
-                var lambdaScope = input[1].sexpr.reduce( // construct new scope
-                        function(acc, x, i) {
-                            acc[x.value] = lambdaArguments[i];
-                            return acc;
-                            }, {}                      )
-                var newContext = new Context(lambdaScope, context);
-                return interpret(input[2], newContext); // Recurse
-                */
                 var formalArg = input[1].sexpr;
                 var actualArg = arguments;
                 var localEnv = {};
@@ -167,13 +154,6 @@
                 return interpret(input[2], localContext); // Recurse
             }
         } else { // non-special form
-            /*
-            var list = input.map( // interpret every node in the list
-                function(x) {
-                    var map_res = interpret(x, context); // Recurse
-                    return map_res; 
-                }               );
-            */
             var list  = []; // for loop alternative to map
             for(var i = 0 ; i < input.length; i++) {
                 list[i] = interpret(input[i], context);
@@ -183,25 +163,22 @@
                 //return list[0].apply(undefined, list.slice(1)); // apply: each list element becomes an actual arg
                 var proc = list.shift(); // Remove first element from array and return that element
                 var args = list;  // shifted list
-                return proc.apply(undefined, args ); // apply: each list element becomes an actual arg 
+                return proc.apply(undefined, args); // apply: each list element becomes an actual arg 
             } else {
                 return list;
             }
         }
     };
-    
+
     var interpret = function(input, context) {
         if (input.type === "expr") { // Expression
              input.result = interpretList(input.sexpr, context); // Recurse
-             // yield
              return input.result;
         } else if (input.type === "identifier") { // Variable
             input.result = context.get(input.value);
-            // yield
             return input.result;
         } else if (input.type === "number") { // Literal
             input.result = input.value;
-            // yield
             return input.result;
         } else {
             console.log("Warning: interpret can not handle atom type", input.type);

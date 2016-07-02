@@ -109,7 +109,7 @@
     var Context = function(scope, parent) {
         this.scope = scope;
         this.parent = parent;
-        
+        /*
         this.get = function(identifier){
           if (identifier in this.scope) {
               return this.scope[identifier];
@@ -117,6 +117,19 @@
               return this.parent.get(identifier); // recursive to the top.
           }
         };
+        */
+        this.get = function(identifier) {
+            console.log("get:", identifier);
+            var curEnv = this;
+            while(curEnv !== undefined) {
+                var curScope = curEnv.scope;
+                if (identifier in curScope) {
+                    console.log("name:", identifier, "value:", curScope[identifier]);
+                    return curScope[identifier];
+                }
+                curEnv = curEnv.parent;
+            }
+        }
     };
 
 /*******                Interpreter                      ******/

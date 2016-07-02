@@ -66,7 +66,6 @@
         //console.log("drawRect ", position);
         ctx.fillStyle = "green";
         ctx.fillRect(position.x, position.y, 20, 20);
-
     }
     
 /*******                Parser                      ******/
@@ -129,7 +128,7 @@
                 }
                 curEnv = curEnv.parent;
             }
-        }
+        };
     };
 
 /*******                Interpreter                      ******/
@@ -220,7 +219,6 @@
             visualizeList(input, position);
             return;
         } else {
-
             // Init Position, Velocity, Acceleration
             if (input.pos === undefined) {
                 input.pos = new vector(position.x, position.y);
@@ -235,12 +233,12 @@
             drawRect(input.pos);
             drawText(input.value, input.pos);
 
-            if (input.result !== undefined) {
+            if (input.result !== undefined) { // draw result text
                 drawText(input.result, input.pos.add( new vector(0,22) ));
             }
             
             if (input.type === "expr") {
-                visualizeList(input.sexpr, position.add(deltaDownVector) );
+                visualizeList(input.sexpr, position.add(deltaDownVector) );  // recurse
             }
             return;
         }
@@ -340,7 +338,6 @@
         for(var i = 0; i < input.length; i++){
             repelAtom(input[i], other);
         }
-
     };
 
 /*******                Main                ******/    
@@ -392,7 +389,6 @@
         var final_res = interpretList(ast); // core - start with array
         console.log(">>> Final Result: ", final_res);
 
-
         // var gen = interpretList(ast);
         // gen.next();
 
@@ -400,4 +396,4 @@
     }
 
     document.addEventListener('DOMContentLoaded', main, false); // start when ready
-})   ();
+}) ();

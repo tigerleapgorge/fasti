@@ -180,7 +180,10 @@
             }
             
             if (list[0] instanceof Function) { // apply JS function <========== THIS NEEDS TO CHANGE FOR GENERATOR
-                return list[0].apply(undefined, list.slice(1)); // apply: each list element becomes an actual arg 
+                //return list[0].apply(undefined, list.slice(1)); // apply: each list element becomes an actual arg
+                var proc = list.shift(); // Remove first element from array and return that element
+                var args = list;  // shifted list
+                return proc.apply(undefined, args ); // apply: each list element becomes an actual arg 
             } else {
                 return list;
             }

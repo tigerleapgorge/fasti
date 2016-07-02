@@ -142,10 +142,18 @@
                 input[3].result = interpret( input[3], context ); // Recurse alternative
                 return input[3].result;
             }
+        } else if (input[0].value === "define") {
+            context.scope[input[1].value] = interpret(input[2], context);
+            console.log("defining:", context)
+            return;
         } else if (input[0].value === "lambda") { // special form
             return function() { // RETURN A FUNCTION
                 var formalArg = input[1].sexpr;
                 var actualArg = arguments;
+
+                if (formalArg.length !== actualArg.length) {
+                    console.error("Lambda call binding failed", formalArg, actualArg);
+                }
                 var localEnv = {};
                 for(var i = 0; i < arguments.length; i++) {
                     localEnv[formalArg[i].value] = actualArg[i]; // bind 
@@ -160,6 +168,7 @@
             }
             
             if (list[0] instanceof Function) { // apply JS function <========== THIS NEEDS TO CHANGE FOR GENERATOR
+                console.log("functions:", list[0]);
                 //return list[0].apply(undefined, list.slice(1)); // apply: each list element becomes an actual arg
                 var proc = list.shift(); // Remove first element from array and return that element
                 var args = list;  // shifted list
@@ -330,7 +339,7 @@
 /*******                Main                ******/
 
     function main(){
-        var sourceCode = "( ( lambda ( a b c ) (+ a ( + b c) ) ) 1 2 3 )";
+        var sourceCode = "( ( define foo ( lambda (a b) (+ a b) ) ) (foo 1 2) )";
         //var sourceCode = "( ( lambda (x) x ) 3 )";
         //var sourceCode = "(+ 3 5)";
         //var sourceCode = "(1 2 3)";

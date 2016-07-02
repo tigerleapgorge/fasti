@@ -190,7 +190,7 @@
             input.result = input.value;
             return input.result;
         } else {
-            console.log("Warning: interpret can not handle atom type", input.type);
+            console.error("Warning: interpret do not recognize atom type: ", input.type);
         }
     };
 
@@ -227,8 +227,9 @@
             drawRect(input.pos);
             drawText(input.value, input.pos);
 
-            if (input.result !== undefined) { // draw result text
-                drawText(input.result, input.pos.add( new vector(0,22) ));
+            if (input.result !== undefined && 
+                !(input.result instanceof Function) ) { // ignor functions
+                drawText(input.result, input.pos.add( new vector(0,22) )); // draw result text
             }
             
             if (input.type === "expr") {

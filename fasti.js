@@ -118,12 +118,10 @@
         };
         */
         this.get = function(identifier) {
-            console.log("get:", identifier);
             var curEnv = this;
             while(curEnv !== undefined) {
                 var curScope = curEnv.scope;
                 if (identifier in curScope) {
-                    console.log("name:", identifier, "value:", curScope[identifier]);
                     return curScope[identifier];
                 }
                 curEnv = curEnv.parent;
@@ -169,11 +167,18 @@
                 return interpret(input[2], localContext); // Recurse
             }
         } else { // non-special form
+            /*
             var list = input.map( // interpret every node in the list
                 function(x) {
                     var map_res = interpret(x, context); // Recurse
                     return map_res; 
                 }               );
+            */
+            var list  = []; // for loop alternative to map
+            for(var i = 0 ; i < input.length; i++) {
+                list[i] = interpret(input[i], context);
+            }
+            
             if (list[0] instanceof Function) { // apply JS function <========== THIS NEEDS TO CHANGE FOR GENERATOR
                 return list[0].apply(undefined, list.slice(1)); // apply: each list element becomes an actual arg 
             } else {

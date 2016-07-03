@@ -182,12 +182,15 @@
     var interpret = function* (input, context) {
         if (input.type === "expr") { // Expression
              input.result = yield* interpretList(input.sexpr, context); // Recurse
+             yield;
              return input.result;
         } else if (input.type === "identifier") { // Variable
             input.result = context.get(input.value);
+            yield;
             return input.result;
         } else if (input.type === "number") { // Literal
             input.result = input.value;
+            yield;
             return input.result;
         } else {
             console.error("Warning: interpret do not recognize atom type: ", input.type);
@@ -351,7 +354,7 @@
                                .split(/\s+/);
         ast = parenthesize(tokenArray);
 
-        var maxFrame = 1; // <= number of Frames before Visualization stops
+        var maxFrame = 100000; // <= number of Frames before Visualization stops
 
         var frame = 0;
         var drawCall = function() { // core
@@ -386,11 +389,25 @@
         //  console.log(">>> Final Result: ", final_res);
 
         var gen = interpretList(ast);
+        /*
         var step = gen.next();
         while(!step.done) {
             gen.next()
         }
         console.log(">>> Final Result: ", step.result);
+        */
+
+        var interpretLoop = function() {
+            var step = gen.next();
+            if(!step.done){
+                console.log(">>> Not Done: ", step.result);
+                window.setTimeout(interpretLoop, 1000);
+            } else {
+                console.log(">>> Final Result: ", step.result);
+            }
+        }
+        interpretLoop();
+        
 
         return;
     }

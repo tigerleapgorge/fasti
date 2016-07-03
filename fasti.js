@@ -95,7 +95,7 @@
 
 /*******                Library                      ******/
     var library = {
-        "+" : function(x, y) {
+        "+" : function*(x, y) { // same type as Lambda closure
             //  return x + y;
                 var sum = 0;
                 for(var i = 0; i < arguments.length; i++) {
@@ -130,41 +130,41 @@
     };
 
 /*******                Interpreter                      ******/
-    var interpretList = function(input, context) {
+    var interpretList = function*(input, context) {
         if (context === undefined) { // first time in, create primative library
-            return interpretList(input, new Context(library) ); // Recurse -- load lib
+            return yield* interpretList (input, new Context(library) ); // Recurse -- load lib
         } else if (input[0].value === "if") { // special form
-            input[1].result = interpret( input[1], context );
+            input[1].result = yield* interpret( input[1], context );
             if ( input[1].result ) { // Recurse
-                input[2].result = interpret( input[2], context ); // Recurse consequence
+                input[2].result = yield* interpret( input[2], context ); // Recurse consequence
                 return input[2].result;
             } else {
-                input[3].result = interpret( input[3], context ); // Recurse alternative
+                input[3].result = yield* interpret( input[3], context ); // Recurse alternative
                 return input[3].result;
             }
         } else if (input[0].value === "define") {
-            context.scope[input[1].value] = interpret(input[2], context);
+            context.scope[input[1].value] = yield* interpret(input[2], context);
             console.log("defining:", context)
             return;
         } else if (input[0].value === "lambda") { // special form
-            return function() { // RETURN A FUNCTION
+            return function* () { // RETURN A FUNCTION
                 var formalArg = input[1].sexpr;
                 var actualArg = arguments;
 
                 if (formalArg.length !== actualArg.length) {
-                    console.error("Lambda call binding failed", formalArg, actualArg);
+                    console.error("Lambda call binding failed", formalArg, actualArg, input[2]);
                 }
                 var localEnv = {};
                 for(var i = 0; i < arguments.length; i++) {
                     localEnv[formalArg[i].value] = actualArg[i]; // bind 
                 }
                 var localContext = new Context(localEnv, context); // chain it with previous Env
-                return interpret(input[2], localContext); // Recurse
+                return  yield* interpret(input[2], localContext); // Recurse
             }
         } else { // non-special form
             var list  = []; // for loop alternative to map
             for(var i = 0 ; i < input.length; i++) {
-                list[i] = interpret(input[i], context);
+                list[i] = yield* interpret(input[i], context);
             }
             
             if (list[0] instanceof Function) { // apply JS function <========== THIS NEEDS TO CHANGE FOR GENERATOR
@@ -172,16 +172,16 @@
                 //return list[0].apply(undefined, list.slice(1)); // apply: each list element becomes an actual arg
                 var proc = list.shift(); // Remove first element from array and return that element
                 var args = list;  // shifted list
-                return proc.apply(undefined, args); // apply: each list element becomes an actual arg 
+                return yield* proc.apply(undefined, args); // apply: each list element becomes an actual arg 
             } else {
                 return list;
             }
         }
     };
 
-    var interpret = function(input, context) {
+    var interpret = function* (input, context) {
         if (input.type === "expr") { // Expression
-             input.result = interpretList(input.sexpr, context); // Recurse
+             input.result = yield* interpretList(input.sexpr, context); // Recurse
              return input.result;
         } else if (input.type === "identifier") { // Variable
             input.result = context.get(input.value);
@@ -381,11 +381,16 @@
         var drawIntervalID = window.setInterval(drawCall, 5); // 1st Method Start (2nd arg in millisecond)
         //drawCall(); // 2nd Method - Start
 
-        var final_res = interpretList(ast); // core - start with array
-        console.log(">>> Final Result: ", final_res);
+// Interpret change from function to function generator
+        //  var final_res = interpretList(ast); // core - start with array
+        //  console.log(">>> Final Result: ", final_res);
 
-        // var gen = interpretList(ast);
-        // gen.next();
+        var gen = interpretList(ast);
+        var step = gen.next();
+        while(!step.done) {
+            gen.next()
+        }
+        console.log(">>> Final Result: ", step.result);
 
         return;
     }

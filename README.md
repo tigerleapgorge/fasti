@@ -1,2 +1,2 @@
-# Yggdrasil
-Abstract Syntax Tree Interpreter Visualizer using Force Directed Graph
+# Fasti
+Force-directed Abstract Syntax Tree Interpreter - a dynamic visualizer for Lisp

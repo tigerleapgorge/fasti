@@ -204,41 +204,30 @@
             visualize(input[i], curPosition);
             curPosition = curPosition.add(deltaRightVector);
         }
-        return;
     };
 
     var visualize = function(input, position) { // TODO: break up pos init from visualize
-        if (position === undefined) {
-            return visualize(input, new vector(canvas.width/5,  canvas.height/5) );
-        } else if (input === undefined) {
-            return;
-        } else if (input instanceof Array) {
-            visualizeList(input, position);
-            return;
-        } else {
-            // Init Position, Velocity, Acceleration
-            if (input.pos === undefined) {
-                input.pos = new vector(position.x, position.y);
-            }
-            if (input.v === undefined) {
-	            input.v = new vector(0,0);
-            }
-            if (input.a === undefined) {
-                input.a = new vector(0,0);
-            }
+        // Init Position, Velocity, Acceleration
+        if (input.pos === undefined) {
+            input.pos = new vector(position.x, position.y);
+        }
+        if (input.v === undefined) {
+            input.v = new vector(0,0);
+        }
+        if (input.a === undefined) {
+            input.a = new vector(0,0);
+        }
 
-            drawRect(input.pos);
-            drawText(input.value, input.pos);
+        drawRect(input.pos);
+        drawText(input.value, input.pos);
 
-            if (input.result !== undefined && 
-                !(input.result instanceof Function) ) { // ignor functions
-                drawText(input.result, input.pos.add( new vector(0,22) )); // draw result text
-            }
+        if (input.result !== undefined && 
+            !(input.result instanceof Function) ) { // ignor functions
+            drawText(input.result, input.pos.add( new vector(0,22) )); // draw result text
+        }
             
-            if (input.type === "expr") {
-                visualizeList(input.sexpr, position.add(deltaDownVector) );  // recurse
-            }
-            return;
+        if (input.type === "expr") {
+            visualizeList(input.sexpr, position.add(deltaDownVector) );  // recurse
         }
     };
 
@@ -324,7 +313,7 @@
             repelList(ast, input); // transverse AST again for each node - O(N^2)
         } else { // 2nd transversal - other holds current node
             if(input !== other){
-                applyRepulsion(input, other); // apply electrostatic force
+                applyRepulsion(input, other); // apply electrostatic force between each node with every other node
             }
         }
 
@@ -367,7 +356,7 @@
             ctx.clearRect(0, 0, canvas.width, canvas.height); // clear screen
             drawText("Frame: " + frame, {x:30, y:30}); // frame counter upper left
 
-            visualize(ast); // init p,v,a and draw
+            visualizeList(ast, new vector(canvas.width/5,  canvas.height/5) ); // init p,v,a and draw
             springList(ast); // O(N)
             repelList(ast);  // O(N^2)
             updatePositionList(ast);

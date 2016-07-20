@@ -56,16 +56,23 @@
     var deltaDownVector = new vector(0,77);
 
 /*******                Graphics                      ******/
-    function drawText(myStr, posVector){
+    function drawText(myStr, posVector) {
         ctx.font = "25px Arial";
         ctx.fillStyle = "#0095DD";
         ctx.fillText(myStr, posVector.x-10, posVector.y+7);
     }
 
-    function drawRect(position){
+    function drawRect(position) {
         //console.log("drawRect ", position);
         ctx.fillStyle = "green";
         ctx.fillRect(position.x, position.y, 20, 20);
+    }
+
+    function drawLine(position1, position2) {
+        ctx.beginPath();
+        ctx.moveTo(position1.x, position1.y);
+        ctx.lineTo(position2.x, position2.y);
+        ctx.stroke();
     }
     
 /*******                Parser                      ******/
@@ -198,15 +205,15 @@
     };
 
 /*******                Visualizer                      ******/
-    var visualizeList = function(input, position) { // TODO: break up pos init from visualize
+    var initPvaList = function(input, position) {
         var curPosition = position;
         for(var i = 0; i < input.length; i++){
-            visualize(input[i], curPosition);
+            initPva(input[i], curPosition);
             curPosition = curPosition.add(deltaRightVector);
         }
     };
 
-    var visualize = function(input, position) { // TODO: break up pos init from visualize
+    var initPva = function(input, position) {
         // Init Position, Velocity, Acceleration
         if (input.pos === undefined) {
             input.pos = new vector(position.x, position.y);
@@ -218,6 +225,19 @@
             input.a = new vector(0,0);
         }
 
+        if (input.type === "expr") {
+            initPvaList(input.sexpr, position.add(deltaDownVector) );  // recurse
+        }
+    };
+
+// Drawing AST
+    var visualizeList = function(input, position) {
+        for(var i = 0; i < input.length; i++){
+            visualize(input[i]);
+        }
+    };
+
+    var visualize = function(input, position) {
         drawRect(input.pos);
         drawText(input.value, input.pos);
 
@@ -227,7 +247,7 @@
         }
             
         if (input.type === "expr") {
-            visualizeList(input.sexpr, position.add(deltaDownVector) );  // recurse
+            visualizeList(input.sexpr);  // recurse
         }
     };
 
@@ -356,7 +376,8 @@
             ctx.clearRect(0, 0, canvas.width, canvas.height); // clear screen
             drawText("Frame: " + frame, {x:30, y:30}); // frame counter upper left
 
-            visualizeList(ast, new vector(canvas.width/5,  canvas.height/5) ); // init p,v,a and draw
+            initPvaList(ast, new vector(canvas.width/5,  canvas.height/5) ); // initialize Position, Velocity, Acceleration
+            visualizeList(ast); // draw AST
             springList(ast); // O(N)
             repelList(ast);  // O(N^2)
             updatePositionList(ast);

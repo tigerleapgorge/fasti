@@ -56,25 +56,24 @@
     var deltaDownVector = new vector(0,77);
 
 /*******                Graphics                      ******/
-    function drawText(myStr, posVector) {
+    var drawText = function(myStr, posVector) {
         ctx.font = "25px Arial";
         ctx.fillStyle = "#0095DD";
         ctx.fillText(myStr, posVector.x-10, posVector.y+7);
-    }
+    };
 
-    function drawRect(position) {
-        //console.log("drawRect ", position);
+    var drawRect = function(position) {
         ctx.fillStyle = "green";
         ctx.fillRect(position.x, position.y, 20, 20);
-    }
+    };
 
-    function drawLine(position1, position2) {
+    var drawLine = function(position1, position2) {
         ctx.beginPath();
         ctx.moveTo(position1.x, position1.y);
         ctx.lineTo(position2.x, position2.y);
         ctx.strokeStyle = "white";
         ctx.stroke();
-    }
+    };
     
 /*******                Parser                      ******/
     var categorize = function(curToken){
@@ -83,7 +82,7 @@
         } else {
             return { type : "identifier", value : curToken };
         }
-    }
+    };
     
     var parenthesize = function(tokenList) {
         var retArray = [];
@@ -99,7 +98,7 @@
             }
         }
         return retArray;
-    }
+    };
 
 /*******                Library                      ******/
     var library = {
@@ -331,7 +330,7 @@
         inputA.a = inputA.a.add( delta_acc.neg() );  // Apply acceleration to A
         inputB.a = inputB.a.add( delta_acc );        // Apply acceleration to B
         return;
-    }
+    };
     var repelAtom = function(input, other) { // other holds first time transversal input
         if(other === undefined) {  // 1st transveral 
             repelList(ast, input); // transverse AST again for each node - O(N^2)
@@ -393,7 +392,7 @@
             }
             */
             return;
-        }
+        };
 
         var drawIntervalID = window.setInterval(drawCall, 5); // 1st Method Start (2nd arg in millisecond)
         //drawCall(); // 2nd Method - Start
@@ -419,7 +418,8 @@
             } else {
                 console.log(">>> Final Result: ", step.result);
             }
-        }
+        };
+        
         interpretLoop();
         
 

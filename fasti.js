@@ -72,6 +72,7 @@
         ctx.beginPath();
         ctx.moveTo(position1.x, position1.y);
         ctx.lineTo(position2.x, position2.y);
+        ctx.strokeStyle = "white";
         ctx.stroke();
     }
     
@@ -231,13 +232,16 @@
     };
 
 // Drawing AST
-    var visualizeList = function(input, position) {
+    var visualizeList = function(input, parent) {
         for(var i = 0; i < input.length; i++){
+            if (parent !== undefined) {
+                drawLine(input[i].pos, parent.pos);
+            }
             visualize(input[i]);
         }
     };
 
-    var visualize = function(input, position) {
+    var visualize = function(input) {
         drawRect(input.pos);
         drawText(input.value, input.pos);
 
@@ -247,7 +251,7 @@
         }
             
         if (input.type === "expr") {
-            visualizeList(input.sexpr);  // recurse
+            visualizeList(input.sexpr, input);  // recurse
         }
     };
 

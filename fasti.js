@@ -386,7 +386,7 @@
                                .split(/\s+/);
         ast = parenthesize(tokenArray);
 
-        var maxFrame = 1000; // <= number of Frames before Visualization stops
+        var maxFrame = 10000; // <= number of Frames before Visualization stops
 
         var frame = 0;
         var drawCall = function() { // core
@@ -395,7 +395,8 @@
                 window.clearInterval(drawIntervalID);
             }
             
-            //console.log("drawCall", frame++); // top left frames
+            
+            //console.log("drawCall", frame); // top left frames
             ctx.clearRect(0, 0, canvas.width, canvas.height); // clear screen
             drawText("Frame: " + frame, {x:30, y:30}); // frame counter upper left
 
@@ -405,6 +406,7 @@
             repelList(ast);  // O(N^2)
             updatePositionList(ast);
             updateVelocityList(ast);
+            frame++;
 
             /*
             if(frame < maxFrame) { // 2nd Method - Stop

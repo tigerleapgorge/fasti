@@ -109,7 +109,18 @@
                     sum += arguments[i];
                 }
                 return sum;
-              }
+        },
+        "-" : function*(x, y) {
+            return (x - y);
+        },
+        "*" : function*(x, y) {
+            console.log("x * y :", x, y);
+            return (x * y);
+        },
+        "<" : function*(x, y) {
+            console.log("x < y :", x, y);
+            return (x < y);
+        },
     };
     
     var Context = function(scope, parent) {
@@ -356,6 +367,14 @@
 
     function main(){
         var sourceCode = "( ( define foo ( lambda (a b) (+ a b) ) ) (foo 1 2) )";
+        var sourceCode = "( ( define fib " +
+                         "    ( lambda (x)" + 
+                         "             ( if ( < x 2 ) " +  
+                         "                  x " + 
+                         "                  (* x ( fib (- x 1) )  )" +
+                         "  ) )        ) " +
+                         "  ( fib 5 ) " +
+                         ")";
         //var sourceCode = "( ( lambda (x) x ) 3 )";
         //var sourceCode = "(+ 3 5)";
         //var sourceCode = "(1 2 3)";
@@ -366,7 +385,7 @@
                                .split(/\s+/);
         ast = parenthesize(tokenArray);
 
-        var maxFrame = 100000; // <= number of Frames before Visualization stops
+        var maxFrame = 1000; // <= number of Frames before Visualization stops
 
         var frame = 0;
         var drawCall = function() { // core
@@ -375,7 +394,7 @@
                 window.clearInterval(drawIntervalID);
             }
             
-            console.log("drawCall", frame++); // top left frames
+            //console.log("drawCall", frame++); // top left frames
             ctx.clearRect(0, 0, canvas.width, canvas.height); // clear screen
             drawText("Frame: " + frame, {x:30, y:30}); // frame counter upper left
 
@@ -414,12 +433,12 @@
             var step = gen.next();
             if(!step.done){
                 console.log(">>> Not Done: ", step.result);
-                window.setTimeout(interpretLoop, 1000);
+                window.setTimeout(interpretLoop, 50);  // interpreter timeout
             } else {
                 console.log(">>> Final Result: ", step.result);
             }
         };
-        
+
         interpretLoop();
         
 

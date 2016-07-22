@@ -1,4 +1,5 @@
-// Force directed Abstract Syntax Tree Interpreter Copyright Charles Li
+// FASTI: Force-directed Abstract Syntax Tree Interpreter 
+// Copyright (C) 2016 Charles Li
 
 (function () {
     "use strict";

@@ -300,8 +300,8 @@
     };
 
 // Hooke's law: F = -kX
-    var springLength = 77;
-    var springConstant = 1; 
+    var springLength = 50;  // default length of springs // Parameter tweak
+    var springConstant = 1; // Parameter tweak
     var applySpring = function(inputA, inputB) {
         var d = inputB.pos.subtract(inputA.pos);
         var displacement = d.magnitude() - springLength;
@@ -332,13 +332,13 @@
 
 
 // Coulomb's law: F = k q1 q2 / r^2
-    var chargeConstant = 50000; // k
+    var chargeConstant = 50000; // k  // Parameter tweak
     var applyRepulsion = function(inputA, inputB){
         var distance = inputB.pos.subtract(inputA.pos); // TODO: when input1 and input2 pos overlap
         var distance_magSquared = distance.magnitudeSquared(); // denominator
         var direction = distance.normalize(); // unit length
 
-        var delta_acc = direction.multiply(0.5 * chargeConstant / (distance_magSquared + 50 ) ) 
+        var delta_acc = direction.multiply(0.5 * chargeConstant / (distance_magSquared + 50 ) );   // Parameter tweak 
         inputA.a = inputA.a.add( delta_acc.neg() );  // Apply acceleration to A
         inputB.a = inputB.a.add( delta_acc );        // Apply acceleration to B
         return;
@@ -368,13 +368,13 @@
 
     function main(){
         var sourceCode = "( ( define foo ( lambda (a b) (+ a b) ) ) (foo 1 2) )";
-        var sourceCode = "( ( define fib " +
-                         "    ( lambda (x)" + 
-                         "             ( if ( < x 2 ) " +  
-                         "                  x " + 
-                         "                  (* x ( fib (- x 1) )  )" +
-                         "  ) )        ) " +
-                         "  ( fib 5 ) " +
+        var sourceCode = "( ( define fib                            " +
+                         "    ( lambda (x)                          " + 
+                         "             ( if ( < x 2 )               " +  
+                         "                  x                       " + 
+                         "                  (* x ( fib (- x 1) )  ) " +
+                         "  ) )        )                            " +
+                         "  ( fib 5 )                               " +
                          ")";
         //var sourceCode = "( ( lambda (x) x ) 3 )";
         //var sourceCode = "(+ 3 5)";

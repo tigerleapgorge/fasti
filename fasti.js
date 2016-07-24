@@ -118,6 +118,10 @@
             console.log("x * y :", x, y);
             return (x * y);
         },
+        "/" : function*(x, y) {
+            console.log("x / y :", x, y);
+            return (x / y);
+        },
         "<" : function*(x, y) {
             console.log("x < y :", x, y);
             return (x < y);
@@ -367,7 +371,8 @@
 /*******                Main                ******/
 
     function main(){
-        var sourceCode = "( ( define foo ( lambda (a b) (+ a b) ) ) (foo 1 2) )";
+        //var sourceCode = "( ( define foo ( lambda (a b) (+ a b) ) ) (foo 1 2) )";
+        /*
         var sourceCode = "( ( define fib                            " +
                          "    ( lambda (x)                          " + 
                          "             ( if ( < x 2 )               " +  
@@ -376,9 +381,11 @@
                          "  ) )        )                            " +
                          "  ( fib 5 )                               " +
                          ")";
+       */
         //var sourceCode = "( ( lambda (x) x ) 3 )";
         //var sourceCode = "(+ 3 5)";
         //var sourceCode = "(1 2 3)";
+        var sourceCode = "(/ 6 3)";
 
         tokenArray = sourceCode.replace(/\(/g, " ( ")
                                .replace(/\)/g, " ) ")

@@ -59,13 +59,13 @@
 /*******                Graphics                      ******/
     var drawText = function(myStr, posVector) {
         ctx.font = "25px Arial";
-        ctx.fillStyle = "#0095DD";
-        ctx.fillText(myStr, posVector.x-10, posVector.y+7);
+        ctx.fillStyle = "OrangeRed";  // http://www.w3schools.com/cssref/css_colors.asp
+        ctx.fillText(myStr, posVector.x, posVector.y+20);
     };
 
     var drawRect = function(position) {
-        ctx.fillStyle = "green";
-        ctx.fillRect(position.x, position.y, 20, 20);
+        ctx.fillStyle = "yellow";
+        ctx.fillRect(position.x, position.y, 45, 45);
     };
 
     var drawLine = function(position1, position2) {
@@ -372,7 +372,7 @@
 
     function main(){
         //var sourceCode = "( ( define foo ( lambda (a b) (+ a b) ) ) (foo 1 2) )";
-        /*
+       
         var sourceCode = "( ( define fib                            " +
                          "    ( lambda (x)                          " + 
                          "             ( if ( < x 2 )               " +  
@@ -381,11 +381,11 @@
                          "  ) )        )                            " +
                          "  ( fib 5 )                               " +
                          ")";
-       */
+       
         //var sourceCode = "( ( lambda (x) x ) 3 )";
         //var sourceCode = "(+ 3 5)";
         //var sourceCode = "(1 2 3)";
-        var sourceCode = "(/ 6 3)";
+        //var sourceCode = "(/ 6 3)";
 
         tokenArray = sourceCode.replace(/\(/g, " ( ")
                                .replace(/\)/g, " ) ")
@@ -405,6 +405,11 @@
             
             //console.log("drawCall", frame); // top left frames
             ctx.clearRect(0, 0, canvas.width, canvas.height); // clear screen
+            /*
+            ctx.fillStyle = "white";
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            */
+            
             drawText("Frame: " + frame, {x:30, y:30}); // frame counter upper left
 
             initPvaList(ast, new vector(canvas.width/5,  canvas.height/5) ); // initialize Position, Velocity, Acceleration

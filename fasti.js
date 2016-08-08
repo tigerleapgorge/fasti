@@ -255,8 +255,11 @@
 
     var visualizeEnv = function() {
         for (var i = 0; i < ContextList.length; i++) {
+            var x_loc = 20;
             for (var key in ContextList[i]) {
                  //drawText(ContextList[i][key], {x:20, y:30*i + 50} );
+                 drawText(key, {x:x_loc, y:30*i + 50} );
+                 x_loc += 100;
             }
         } 
     }

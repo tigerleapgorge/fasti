@@ -152,14 +152,18 @@
         };
     };
 
-    var ContextList = []; // parallel implementation to Context (for now)
+    var ContextList = []; // array of Context for visualization
 
 /*******                Interpreter                      ******/
     var interpretList = function*(input, context) {
         if (context === undefined) { // first time in, create primative library
             var firstContext  = new Context(library);
+            var secondContext = new Context( {} , firstContext);
             ContextList.push( firstContext );
-            return yield* interpretList (input, firstContext ); // Recurse -- load lib
+            ContextList.push( secondContext );
+            var finalResult = yield* interpretList (input, secondContext ); // Recurse -- load lib
+            ContextList.pop; // pop second context
+            return finalResult;
         } else if (input[0].value === "if") { // special form
             input[1].result = yield* interpret( input[1], context );
             if ( input[1].result ) { // Recurse
@@ -257,12 +261,16 @@
         for (var i = 0; i < ContextList.length; i++) {
             var x_loc = 20;
             for (var key in ContextList[i].scope) {
-                 //drawText(ContextList[i][key], {x:20, y:30*i + 50} );
-                 drawText(key, {x:x_loc, y:30*i + 50} );
+                 var keyValPair = key;
+                 if( typeof ContextList[i].scope[key] !== "function" ) {
+                    keyValPair = key + " : " + ContextList[i].scope[key]; // display value if not a function
+                 }
+                 drawText(keyValPair, {x:x_loc, y:30*i + 50} );
+
                  x_loc += 100;
             }
         } 
-    }
+    };
 
 
 // Drawing AST

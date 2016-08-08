@@ -152,10 +152,14 @@
         };
     };
 
+    var ContextList = []; // parallel implementation to Context (for now)
+
 /*******                Interpreter                      ******/
     var interpretList = function*(input, context) {
         if (context === undefined) { // first time in, create primative library
-            return yield* interpretList (input, new Context(library) ); // Recurse -- load lib
+            var firstContext  = new Context(library);
+            ContextList.push( firstContext );
+            return yield* interpretList (input, firstContext ); // Recurse -- load lib
         } else if (input[0].value === "if") { // special form
             input[1].result = yield* interpret( input[1], context );
             if ( input[1].result ) { // Recurse
@@ -170,7 +174,7 @@
             console.log("defining:", context)
             return;
         } else if (input[0].value === "lambda") { // special form
-            return function* () { // RETURN A FUNCTION
+            return function* () { // closure
                 var formalArg = input[1].sexpr;
                 var actualArg = arguments;
 
@@ -182,7 +186,10 @@
                     localEnv[formalArg[i].value] = actualArg[i]; // bind 
                 }
                 var localContext = new Context(localEnv, context); // chain it with previous Env
-                return  yield* interpret(input[2], localContext); // Recurse
+                ContextList.push( localContext ); // add lambda context to the list
+                var lambdaResult = yield* interpret(input[2], localContext); // Recurse
+                ContextList.pop(); // must match push
+                return lambdaResult;
             }
         } else { // non-special form
             var list  = []; // for loop alternative to map
@@ -245,6 +252,15 @@
             initPvaList(input.sexpr, position.add(deltaDownVector) );  // recurse
         }
     };
+
+    var visualizeEnv = function() {
+        for (var i = 0; i < ContextList.length; i++) {
+            for (var key in ContextList[i]) {
+                 //drawText(ContextList[i][key], {x:20, y:30*i + 50} );
+            }
+        } 
+    }
+
 
 // Drawing AST
     var visualizeList = function(input, parent) {
@@ -413,6 +429,7 @@
             drawText("Frame: " + frame, {x:30, y:30}); // frame counter upper left
 
             initPvaList(ast, new vector(canvas.width/5,  canvas.height/5) ); // initialize Position, Velocity, Acceleration
+            visualizeEnv(); // draw "Context" aka symbol tables
             visualizeList(ast); // draw AST
             springList(ast); // O(N)
             repelList(ast);  // O(N^2)

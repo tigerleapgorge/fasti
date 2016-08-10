@@ -10,6 +10,8 @@
     var tokenArray = [];
     var ast = [];
 
+    var curNode;
+
 /*******         Vector Library                      ******/
     function vector(x, y) {
         if ( !(this instanceof vector) ) { // dont need new
@@ -63,8 +65,8 @@
         ctx.fillText(myStr, posVector.x, posVector.y+20);
     };
 
-    var drawRect = function(position) {
-        ctx.fillStyle = "yellow";
+    var drawRect = function(position, color) {
+        ctx.fillStyle = color;
         ctx.fillRect(position.x, position.y, 45, 45);
     };
 
@@ -214,6 +216,7 @@
     };
 
     var interpret = function* (input, context) {
+        curNode = input; // used for visualizer
         if (input.type === "expr") { // Expression
              input.result = yield* interpretList(input.sexpr, context); // Recurse
              yield;
@@ -284,7 +287,15 @@
     };
 
     var visualize = function(input) {
-        drawRect(input.pos);
+        var color = "white";
+        
+        if (input === curNode) {
+            color = "red"; // highlight currently interpreting node red
+        } else {
+            color = "yellow";
+        }
+        
+        drawRect(input.pos, color);
         drawText(input.value, input.pos);
 
         if (input.result !== undefined && 
@@ -476,7 +487,7 @@
             var step = gen.next();
             if(!step.done){
                 console.log(">>> Not Done: ", step.result);
-                window.setTimeout(interpretLoop, 50);  // interpreter timeout
+                window.setTimeout(interpretLoop, 500);  // interpreter timeout
             } else {
                 console.log(">>> Final Result: ", step.result);
             }

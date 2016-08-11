@@ -5,14 +5,15 @@
     "use strict";
     var canvas = document.getElementById("myCanvas");
     var ctx = canvas.getContext("2d");
-/*******                Data                     ******/
 
+/*******         Global Data                        ******/
     var tokenArray = [];
     var ast = [];
 
-    var curNode;
+    var curNode;  // for visualization
+    var curNodeStack = [];
 
-/*******         Vector Library                      ******/
+/*******         Vector Library                     ******/
     function vector(x, y) {
         if ( !(this instanceof vector) ) { // dont need new
            var new_vec = new vector(x, y);
@@ -70,11 +71,20 @@
         ctx.fillRect(position.x, position.y, 45, 45);
     };
 
-    var drawLine = function(position1, position2) {
+    var drawLine = function(position1, position2, color) {
         ctx.beginPath();
         ctx.moveTo(position1.x, position1.y);
         ctx.lineTo(position2.x, position2.y);
-        ctx.strokeStyle = "white";
+        ctx.strokeStyle = color;
+        ctx.stroke();
+    };
+
+    var drawThickLine = function(position1, position2) {
+        ctx.beginPath();
+        ctx.lineWidth();
+        ctx.moveTo(position1.x, position1.y);
+        ctx.lineTo(position2.x, position2.y);
+        ctx.strokeStyle = "blue";
         ctx.stroke();
     };
     
@@ -210,8 +220,10 @@
     var interpret = function* (input, context) {
         curNode = input; // used for visualizer
         if (input.type === "expr") { // Expression
-             input.result = yield* interpretList(input.sexpr, context); // Recurse
-             yield;
+            curNodeStack.push( input );
+            input.result = yield* interpretList(input.sexpr, context); // Recurse
+            curNodeStack.pop();
+            yield;
              return input.result;
         } else if (input.type === "identifier") { // Variable
             input.result = context.get(input.value);
@@ -268,11 +280,18 @@
     };
 
 
+// Draw AST transversal by the Interpreter
+    var visualizeCurNodeStack = function() {
+        for(var i = 1; i < curNodeStack.length; i++){
+            drawLine(curNodeStack[i].pos, curNodeStack[i-1].pos, "red");
+        }
+    };
+
 // Drawing AST
     var visualizeList = function(input, parent) {
         for(var i = 0; i < input.length; i++){
             if (parent !== undefined) {
-                drawLine(input[i].pos, parent.pos);
+                drawLine(input[i].pos, parent.pos, "white");
             }
             visualize(input[i]);
         }
@@ -451,6 +470,9 @@
             repelList(ast);  // O(N^2)
             updatePositionList(ast);
             updateVelocityList(ast);
+
+            visualizeCurNodeStack(); // still messy
+
             frame++;
 
             /*

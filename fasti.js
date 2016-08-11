@@ -466,18 +466,18 @@
         //  var final_res = interpretList(ast); // core - start with array
         //  console.log(">>> Final Result: ", final_res);
 
-        var firstContext  = new Context(library); // Libary Enviroment
-        var secondContext = new Context( {} , firstContext); // REPL Enviroment
-        ContextList.push( firstContext );
-        ContextList.push( secondContext );
+        var libEnv  = new Context(library); // Libary Enviroment
+        var globalEnv = new Context( {} , libEnv); // REPL Enviroment
+        ContextList.push( libEnv );
+        ContextList.push( globalEnv );
 
-        var gen = interpretList(ast, secondContext);
+        var gen = interpretList(ast, globalEnv);
 
         var interpretLoop = function() {
             var step = gen.next();
             if(!step.done){
                 console.log(">>> Not Done: ", step.result);
-                window.setTimeout(interpretLoop, 500);  // interpreter timeout
+                window.setTimeout(interpretLoop, 100);  // interpreter timeout
             } else {
                 console.log(">>> Final Result: ", step.result);
             }

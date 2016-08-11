@@ -158,15 +158,7 @@
 
 /*******                Interpreter                      ******/
     var interpretList = function*(input, context) {
-        if (context === undefined) { // first time in, create primative library
-            var firstContext  = new Context(library); // move these to start up
-            var secondContext = new Context( {} , firstContext); // move these to start up
-            ContextList.push( firstContext );
-            ContextList.push( secondContext );
-            var finalResult = yield* interpretList (input, secondContext ); // Recurse -- load lib
-            ContextList.pop; // pop second context
-            return finalResult;
-        } else if (input[0].value === "if") { // special form
+        if (input[0].value === "if") { // special form
             input[1].result = yield* interpret( input[1], context );
             if ( input[1].result ) { // Recurse
                 input[2].result = yield* interpret( input[2], context ); // Recurse consequence
@@ -474,8 +466,12 @@
         //  var final_res = interpretList(ast); // core - start with array
         //  console.log(">>> Final Result: ", final_res);
 
-        var gen = interpretList(ast);
+        var firstContext  = new Context(library); // Libary Enviroment
+        var secondContext = new Context( {} , firstContext); // REPL Enviroment
+        ContextList.push( firstContext );
+        ContextList.push( secondContext );
 
+        var gen = interpretList(ast, secondContext);
 
         var interpretLoop = function() {
             var step = gen.next();

@@ -159,8 +159,8 @@
 /*******                Interpreter                      ******/
     var interpretList = function*(input, context) {
         if (context === undefined) { // first time in, create primative library
-            var firstContext  = new Context(library);
-            var secondContext = new Context( {} , firstContext);
+            var firstContext  = new Context(library); // move these to start up
+            var secondContext = new Context( {} , firstContext); // move these to start up
             ContextList.push( firstContext );
             ContextList.push( secondContext );
             var finalResult = yield* interpretList (input, secondContext ); // Recurse -- load lib
@@ -434,7 +434,7 @@
         var maxFrame = 10000; // <= number of Frames before Visualization stops
 
         var frame = 0;
-        var drawCall = function() { // core
+        var drawCall = function() { // draw event
            
             if(frame > maxFrame) { // 1st Method - Stop
                 window.clearInterval(drawIntervalID);
@@ -475,13 +475,7 @@
         //  console.log(">>> Final Result: ", final_res);
 
         var gen = interpretList(ast);
-        /*
-        var step = gen.next();
-        while(!step.done) {
-            gen.next()
-        }
-        console.log(">>> Final Result: ", step.result);
-        */
+
 
         var interpretLoop = function() {
             var step = gen.next();

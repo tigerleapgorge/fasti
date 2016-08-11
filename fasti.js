@@ -426,7 +426,9 @@
         var maxFrame = 10000; // <= number of Frames before Visualization stops
 
         var frame = 0;
-        var drawCall = function() { // draw event
+
+// Visualize event loop
+        var drawCall = function() { 
            
             if(frame > maxFrame) { // 1st Method - Stop
                 window.clearInterval(drawIntervalID);
@@ -462,10 +464,7 @@
         var drawIntervalID = window.setInterval(drawCall, 5); // 1st Method Start (2nd arg in millisecond)
         //drawCall(); // 2nd Method - Start
 
-// Interpret change from function to function generator
-        //  var final_res = interpretList(ast); // core - start with array
-        //  console.log(">>> Final Result: ", final_res);
-
+// Interpret event loop
         var libEnv  = new Context(library); // Libary Enviroment
         var globalEnv = new Context( {} , libEnv); // REPL Enviroment
         ContextList.push( libEnv );

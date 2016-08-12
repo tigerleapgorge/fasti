@@ -219,23 +219,19 @@
 
     var interpret = function* (input, context) {
         curNode = input; // used for visualizer
+        curNodeStack.push( input );
         if (input.type === "expr") { // Expression
-            curNodeStack.push( input );
-            input.result = yield* interpretList(input.sexpr, context); // Recurse
-            curNodeStack.pop();
-            yield;
-             return input.result;
+            input.result = yield* interpretList(input.sexpr, context); // Recurse            
         } else if (input.type === "identifier") { // Variable
             input.result = context.get(input.value);
-            yield;
-            return input.result;
         } else if (input.type === "number") { // Literal
             input.result = input.value;
-            yield;
-            return input.result;
         } else {
             console.error("Warning: interpret do not recognize atom type: ", input.type);
         }
+        yield;
+        curNodeStack.pop();
+        return input.result;
     };
 
 /*******                Visualizer                      ******/

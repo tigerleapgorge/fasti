@@ -186,13 +186,15 @@
                 var formalArg = input[1].sexpr;
                 var actualArg = arguments;
 
-                if (formalArg.length !== actualArg.length) {
+                if (formalArg.length !== actualArg.length) { // check for arg mismatch
                     console.error("Lambda call binding failed", formalArg, actualArg, input[2]);
                 }
+
                 var localEnv = {};
                 for(var i = 0; i < arguments.length; i++) {
                     localEnv[formalArg[i].value] = actualArg[i]; // bind 
                 }
+
                 var localContext = new Context(localEnv, context); // chain it with previous Env
                 ContextList.push( localContext ); // add lambda context to the list
                 var lambdaResult = yield* interpret(input[2], localContext); // Recurse
@@ -425,7 +427,7 @@
                          "                  (* x ( fib (- x 1) )  ) " +
                          "  ) )        )                            " +
                          "  ( fib 5 )                               " +
-                         ")";
+                         ")                                         ";
        
         //var sourceCode = "( ( lambda (x) x ) 3 )";
         //var sourceCode = "(+ 3 5)";

@@ -182,25 +182,28 @@
             console.log("defining:", context)
             return;
         } else if (input[0].value === "lambda") { // special form
-            return function* () { // closure
-                var formalArg = input[1].sexpr;
-                var actualArg = arguments;
+            return {
+                type   : "lambda",
+                method : function* () { // closure
+                    var formalArg = input[1].sexpr;
+                    var actualArg = arguments;
 
-                if (formalArg.length !== actualArg.length) { // check for arg mismatch
-                    console.error("Lambda call binding failed", formalArg, actualArg, input[2]);
+                    if (formalArg.length !== actualArg.length) { // check for arg mismatch
+                        console.error("Lambda call binding failed", formalArg, actualArg, input[2]);
+                    }
+
+                    var localEnv = {};
+                    for(var i = 0; i < arguments.length; i++) {
+                        localEnv[formalArg[i].value] = actualArg[i]; // bind 
+                    }
+
+                    var localContext = new Context(localEnv, context); // chain it with previous Env
+                    ContextList.push( localContext ); // add lambda context to the list
+                    var lambdaResult = yield* interpret(input[2], localContext); // Recurse
+                    ContextList.pop(); // must match push
+                    return lambdaResult;
                 }
-
-                var localEnv = {};
-                for(var i = 0; i < arguments.length; i++) {
-                    localEnv[formalArg[i].value] = actualArg[i]; // bind 
-                }
-
-                var localContext = new Context(localEnv, context); // chain it with previous Env
-                ContextList.push( localContext ); // add lambda context to the list
-                var lambdaResult = yield* interpret(input[2], localContext); // Recurse
-                ContextList.pop(); // must match push
-                return lambdaResult;
-            }
+            };
         } else { // non-special form
             var list  = []; // for loop alternative to map
             for(var i = 0 ; i < input.length; i++) {
@@ -213,6 +216,11 @@
                 var proc = list.shift(); // Remove first element from array and return that element
                 var args = list;  // shifted list
                 return yield* proc.apply(undefined, args); // apply: each list element becomes an actual arg 
+            } else if (list[0].type === "lambda") {
+                console.log("applying class lambda");
+                var proc = list.shift().method; // Remove first element from array and return that element
+                var args = list;  // shifted list
+                return yield* proc.apply(undefined, args); // apply: each list element becomes an actual arg
             } else {
                 return list;
             }

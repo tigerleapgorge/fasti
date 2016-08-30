@@ -184,8 +184,10 @@
         } else if (input[0].value === "lambda") { // special form
             return {
                 type   : "lambda",
+                formal : input[1].sexpr,
                 method : function* () { // closure
-                    var formalArg = input[1].sexpr;
+                    console.log("This is", this);
+                    var formalArg = this.formal;
                     var actualArg = arguments;
 
                     if (formalArg.length !== actualArg.length) { // check for arg mismatch
@@ -218,9 +220,10 @@
                 return yield* proc.apply(undefined, args); // apply: each list element becomes an actual arg 
             } else if (list[0].type === "lambda") {
                 console.log("applying class lambda");
-                var proc = list.shift().method; // Remove first element from array and return that element
+                var lambdaObj = list.shift(); // Remove first element from array and return that element
+                var lambdaMethod = lambdaObj.method; 
                 var args = list;  // shifted list
-                return yield* proc.apply(undefined, args); // apply: each list element becomes an actual arg
+                return yield* lambdaMethod.apply(lambdaObj, args); // lambdaMethod must use lambdaObj as its this pointer
             } else {
                 return list;
             }

@@ -192,15 +192,17 @@
             for(var i = 0 ; i < input.length; i++) {
                 list[i] = yield* interpret(input[i], context);
             }
-            
+console.log("interpreting List  ", list);
+console.log("interpreting List 0", list[0]);
             if (list[0] instanceof Function) { // apply JS function <========== THIS NEEDS TO CHANGE FOR GENERATOR
-                console.log("functions:", list[0]);
-                //return list[0].apply(undefined, list.slice(1)); // apply: each list element becomes an actual arg
+                console.log("Calling JS function:", list[0]);
                 var proc = list.shift(); // Remove first element from array and return that element
                 var args = list;  // shifted list
                 return yield* proc.apply(undefined, args); // apply: each list element becomes an actual arg 
-            } else if (list[0].type === "lambda") {
-                console.log("applying class lambda");
+            } else if ( list.length >= 1 &&
+                        list[0] instanceof Object && // might have loopholes does catch NULL object etc...
+                        list[0].type === "lambda") {
+                console.log("Interpreting user defined lambda", list[0]);
                 var lambdaObj = list.shift(); // Remove first element from array and return that element
                 var formalArg = lambdaObj.formal;
                 var actualArg = list;

@@ -202,11 +202,6 @@
             } else if (list[0].type === "lambda") {
                 console.log("applying class lambda");
                 var lambdaObj = list.shift(); // Remove first element from array and return that element
-                //var lambdaMethod = lambdaObj.method; 
-                var args = list;  // shifted list
-                //return yield* lambdaMethod.apply(lambdaObj, args); // lambdaMethod must use lambdaObj as its this pointer
-
-                console.log("Inlined closure");
                 var formalArg = lambdaObj.formal;
                 var actualArg = list;
                 var funcBody  = lambdaObj.body;
@@ -217,7 +212,6 @@
 
                 var localEnv = {};
                 for(var i = 0; i < actualArg.length; i++) {
-                    console.log("Binding formal:", formalArg[i].value, "actual: ", actualArg[i]);
                     localEnv[formalArg[i].value] = actualArg[i]; // bind 
                 }
 

@@ -186,27 +186,6 @@
                 type   : "lambda",
                 formal : input[1].sexpr,
                 body   : input[2],
-                method : function* () { // closure
-                    console.log("This is", this);
-                    var formalArg = this.formal;
-                    var actualArg = arguments;
-                    var funcBody  = this.body;
-
-                    if (formalArg.length !== actualArg.length) { // check for arg mismatch
-                        console.error("Lambda call binding failed", formalArg, actualArg, funcBody);
-                    }
-
-                    var localEnv = {};
-                    for(var i = 0; i < arguments.length; i++) {
-                        localEnv[formalArg[i].value] = actualArg[i]; // bind 
-                    }
-
-                    var localContext = new Context(localEnv, context); // chain it with previous Env
-                    ContextList.push( localContext ); // add lambda context to the list
-                    var lambdaResult = yield* interpret(funcBody, localContext); // Recurse
-                    ContextList.pop(); // must match push
-                    return lambdaResult;
-                }
             };
         } else { // non-special form
             var list  = []; // for loop alternative to map
@@ -223,9 +202,31 @@
             } else if (list[0].type === "lambda") {
                 console.log("applying class lambda");
                 var lambdaObj = list.shift(); // Remove first element from array and return that element
-                var lambdaMethod = lambdaObj.method; 
+                //var lambdaMethod = lambdaObj.method; 
                 var args = list;  // shifted list
-                return yield* lambdaMethod.apply(lambdaObj, args); // lambdaMethod must use lambdaObj as its this pointer
+                //return yield* lambdaMethod.apply(lambdaObj, args); // lambdaMethod must use lambdaObj as its this pointer
+
+                console.log("Inlined closure");
+                var formalArg = lambdaObj.formal;
+                var actualArg = list;
+                var funcBody  = lambdaObj.body;
+
+                if (formalArg.length !== actualArg.length) { // check for arg mismatch
+                    console.error("Lambda call binding failed", formalArg, actualArg, funcBody);
+                }
+
+                var localEnv = {};
+                for(var i = 0; i < actualArg.length; i++) {
+                    console.log("Binding formal:", formalArg[i].value, "actual: ", actualArg[i]);
+                    localEnv[formalArg[i].value] = actualArg[i]; // bind 
+                }
+
+                var localContext = new Context(localEnv, context); // chain it with previous Env
+                ContextList.push( localContext ); // add lambda context to the list
+                var lambdaResult = yield* interpret(funcBody, localContext); // Recurse
+                ContextList.pop(); // must match push
+                return lambdaResult;
+                
             } else {
                 return list;
             }

@@ -185,13 +185,15 @@
             return {
                 type   : "lambda",
                 formal : input[1].sexpr,
+                body   : input[2],
                 method : function* () { // closure
                     console.log("This is", this);
                     var formalArg = this.formal;
                     var actualArg = arguments;
+                    var funcBody  = this.body;
 
                     if (formalArg.length !== actualArg.length) { // check for arg mismatch
-                        console.error("Lambda call binding failed", formalArg, actualArg, input[2]);
+                        console.error("Lambda call binding failed", formalArg, actualArg, funcBody);
                     }
 
                     var localEnv = {};
@@ -201,7 +203,7 @@
 
                     var localContext = new Context(localEnv, context); // chain it with previous Env
                     ContextList.push( localContext ); // add lambda context to the list
-                    var lambdaResult = yield* interpret(input[2], localContext); // Recurse
+                    var lambdaResult = yield* interpret(funcBody, localContext); // Recurse
                     ContextList.pop(); // must match push
                     return lambdaResult;
                 }

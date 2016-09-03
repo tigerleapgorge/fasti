@@ -192,35 +192,27 @@
             for(var i = 0 ; i < input.length; i++) {
                 list[i] = yield* interpret(input[i], context);
             }
-console.log("interpreting List  ", list);
-console.log("interpreting List 0", list[0]);
-            if (list[0] instanceof Function) { // apply JS function <========== THIS NEEDS TO CHANGE FOR GENERATOR
-                console.log("Calling JS function:", list[0]);
-                var proc = list.shift(); // Remove first element from array and return that element
-                var args = list;  // shifted list
-                return yield* proc.apply(undefined, args); // apply: each list element becomes an actual arg 
-            } else if ( list.length >= 1 &&
-                        list[0] instanceof Object && // might have loopholes does catch NULL object etc...
+
+            if (list[0] instanceof Function) {                   //  JS function
+                var proc = list.shift();                         // first element of the array
+                var args = list;                                 // rest of the element
+                return yield* proc.apply(undefined, args);
+            } else if ( list[0] instanceof Object &&             // LISP lambda
                         list[0].type === "lambda") {
-                console.log("Interpreting user defined lambda", list[0]);
-                var lambdaObj = list.shift(); // Remove first element from array and return that element
+                var lambdaObj = list.shift();                    // Remove first element from array and return that element
                 var formalArg = lambdaObj.formal;
                 var actualArg = list;
                 var funcBody  = lambdaObj.body;
 
-                if (formalArg.length !== actualArg.length) { // check for arg mismatch
-                    console.error("Lambda call binding failed", formalArg, actualArg, funcBody);
-                }
-
-                var localEnv = {};
+                var localEnv = {};                               // construct lambda env
                 for(var i = 0; i < actualArg.length; i++) {
                     localEnv[formalArg[i].value] = actualArg[i]; // bind 
                 }
 
                 var localContext = new Context(localEnv, context); // chain it with previous Env
-                ContextList.push( localContext ); // add lambda context to the list
+                ContextList.push( localContext );                  // push: for visualization
                 var lambdaResult = yield* interpret(funcBody, localContext); // Recurse
-                ContextList.pop(); // must match push
+                ContextList.pop();                                 // pop:  must match push
                 return lambdaResult;
                 
             } else {
@@ -255,8 +247,7 @@ console.log("interpreting List 0", list[0]);
         }
     };
 
-    var initPva = function(input, position) {
-        // Init Position, Velocity, Acceleration
+    var initPva = function(input, position) {  // Init Position, Velocity, Acceleration
         if (input.pos === undefined) {
             input.pos = new vector(position.x, position.y);
         }

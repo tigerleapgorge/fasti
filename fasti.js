@@ -40,8 +40,7 @@
 	};
     
 	vector.prototype.divide = function(n) {
-		return new vector( (this.x / n) || 0,
-                           (this.y / n) || 0);
+		return new vector( (this.x / n) || 0, (this.y / n) || 0);
 	};
     
 	vector.prototype.magnitude = function() {
@@ -115,8 +114,7 @@
 
 /*******                Library                      ******/
     var library = {
-        "+" : function*(x, y) { // same type as Lambda closure
-            //  return x + y;
+        "+" : function*(x, y) {
                 var sum = 0;
                 for(var i = 0; i < arguments.length; i++) {
                     sum += arguments[i];
@@ -127,15 +125,12 @@
             return (x - y);
         },
         "*" : function*(x, y) {
-            console.log("x * y :", x, y);
             return (x * y);
         },
         "/" : function*(x, y) {
-            console.log("x / y :", x, y);
             return (x / y);
         },
         "<" : function*(x, y) {
-            console.log("x < y :", x, y);
             return (x < y);
         },
     };
@@ -222,13 +217,13 @@
     };
 
     var interpret = function* (input, context) {
-        curNode = input; // used for visualizer
+        curNode = input;                         // curNode is used for visualizer
         curNodeStack.push( input );
-        if (input.type === "expr") { // Expression
-            input.result = yield* interpretList(input.sexpr, context); // Recurse            
+        if (input.type === "expr") {              // Expression
+            input.result = yield* interpretList(input.sexpr, context); // Recurse on sub Expression            
         } else if (input.type === "identifier") { // Variable
             input.result = context.get(input.value);
-        } else if (input.type === "number") { // Literal
+        } else if (input.type === "number") {     // Literal
             input.result = input.value;
         } else {
             console.error("Warning: interpret do not recognize atom type: ", input.type);

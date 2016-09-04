@@ -163,7 +163,7 @@
 
 /*******                Interpreter                      ******/
     var interpretList = function*(input, context) {
-        if (input[0].value === "if") { // special form
+        if (input[0].value === "if") { // special forms
             input[1].result = yield* interpret( input[1], context );
             if ( input[1].result ) { // Recurse
                 input[2].result = yield* interpret( input[2], context ); // Recurse consequence
@@ -176,28 +176,31 @@
             context.scope[input[1].value] = yield* interpret(input[2], context);
             console.log("defining:", context)
             return;
-        } else if (input[0].value === "lambda") { // special form
+        } else if (input[0].value === "lambda") { // Create a Lambda
             return {
                 type   : "lambda",
                 formal : input[1].sexpr,
                 body   : input[2],
             };
-        } else { // non-special form
-            var list  = []; // for loop alternative to map
+        } else { // non-special form - applicative order evaluation
+
+            var list  = [];
             for(var i = 0 ; i < input.length; i++) {
                 list[i] = yield* interpret(input[i], context);
             }
 
-            if (list[0] instanceof Function) {                   //  JS function
+            if (list[0] instanceof Function) {               // JS function
                 var proc = list.shift();                         // first element of the array
                 var args = list;                                 // rest of the element
                 return yield* proc.apply(undefined, args);
-            } else if ( list[0] instanceof Object &&             // LISP lambda
+
+            } else if ( list[0] instanceof Object &&         // LISP lambda
                         list[0].type === "lambda") {
                 var lambdaObj = list.shift();                    // Remove first element from array and return that element
-                var formalArg = lambdaObj.formal;
                 var actualArg = list;
-                var funcBody  = lambdaObj.body;
+
+                var formalArg = lambdaObj.formal;
+                var funcBody  = lambdaObj.body;  // duplicate this
 
                 var localEnv = {};                               // construct lambda env
                 for(var i = 0; i < actualArg.length; i++) {

@@ -161,6 +161,32 @@
 
     var ContextList = []; // array of Context for visualization
 
+
+    var copyList = function(input) { // accepts array, returns array
+        
+        console.log("copyList in:  ", input);
+        var inputCopy = [];
+        for(var i = 0; i < input.length; i++){
+            
+            //inputCopy[i] = Object.assign({}, input[i]);
+            inputCopy[i] = JSON.parse(JSON.stringify(input[i]));
+            //inputCopy[i] = $.extend(true, {}, input[i]);
+
+            delete inputCopy[i].a;
+            delete inputCopy[i].v;
+            delete inputCopy[i].pos;
+            console.log("Copying object: ", input[i], "to", inputCopy[i]);
+
+
+            if(input[i].sexpr !== undefined) {
+                inputCopy[i]["sexpr"] = copyList(input[i].sexpr); 
+            }
+        }
+        console.log("copyList out: ", input);
+        return inputCopy;
+    };
+
+
 /*******                Interpreter                      ******/
     var interpretList = function*(input, context) {
         if (input[0].value === "if") { // special forms
@@ -202,6 +228,11 @@
                 var formalArg = lambdaObj.formal;
                 var funcBody  = lambdaObj.body;  // duplicate this
 
+                var copySexpr = copyList(lambdaObj.body.sexpr);
+                //input[0]["sexpr"] = copySexpr;
+                input[input.length] = { type: "expr", sexpr: copySexpr }; 
+                //input[input.length]["sexpr"] = copySexpr;
+
                 var localEnv = {};                               // construct lambda env
                 for(var i = 0; i < actualArg.length; i++) {
                     localEnv[formalArg[i].value] = actualArg[i]; // bind 
@@ -209,7 +240,8 @@
 
                 var localContext = new Context(localEnv, context); // chain it with previous Env
                 ContextList.push( localContext );                  // push: for visualization
-                var lambdaResult = yield* interpret(funcBody, localContext); // Recurse
+                //var lambdaResult = yield* interpretList(funcBody.sexpr, localContext); // Recurse
+                var lambdaResult = yield* interpretList(copySexpr, localContext); // Recurse
                 ContextList.pop();                                 // pop:  must match push
                 return lambdaResult;
                 

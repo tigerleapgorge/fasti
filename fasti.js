@@ -60,14 +60,14 @@
 
 /*******                Graphics                      ******/
     var drawText = function(myStr, posVector) {
-        ctx.font = "25px Arial";
+        ctx.font = "20px Arial";
         ctx.fillStyle = "OrangeRed";  // http://www.w3schools.com/cssref/css_colors.asp
         ctx.fillText(myStr, posVector.x, posVector.y+20);
     };
 
     var drawRect = function(position, color) {
         ctx.fillStyle = color;
-        ctx.fillRect(position.x, position.y, 45, 45);
+        ctx.fillRect(position.x, position.y, 35, 35); // Rectangle size
     };
 
     var drawLine = function(position1, position2, color) {
@@ -340,7 +340,7 @@
 
         if (input.result !== undefined && 
             !(input.result instanceof Function) ) { // ignor functions
-            drawText(input.result, input.pos.add( new vector(0,22) )); // draw result text
+            drawText(input.result, input.pos.add( new vector(0,15) )); // draw result text
         }
             
         if (input.type === "expr") {
@@ -382,7 +382,7 @@
     };
 
 // Hooke's law: F = -kX
-    var springLength = 50;  // default length of springs // Parameter tweak
+    var springLength = 30;  // default length of springs // Parameter tweak
     var springConstant = 1; // Parameter tweak
     var applySpring = function(inputA, inputB) {
         var d = inputB.pos.subtract(inputA.pos);
@@ -414,7 +414,7 @@
 
 
 // Coulomb's law: F = k q1 q2 / r^2
-    var chargeConstant = 50000; // k  // Parameter tweak
+    var chargeConstant = 30000; // k  // Parameter tweak
     var applyRepulsion = function(inputA, inputB){
         var distance = inputB.pos.subtract(inputA.pos); // TODO: when input1 and input2 pos overlap
         var distance_magSquared = distance.magnitudeSquared(); // denominator

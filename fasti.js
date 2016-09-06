@@ -252,7 +252,7 @@
     };
 
     var interpret = function* (input, context) {
-        curNode = input;                         // curNode is used for visualizer
+        curNode = input;                          // curNode is used for visualizer
         curNodeStack.push( input );
         if (input.type === "expr") {              // Expression
             input.result = yield* interpretList(input.sexpr, context); // Recurse on sub Expression            
@@ -329,7 +329,7 @@
     var visualize = function(input) {
         var color = "white";
         
-        if (input === curNode) {
+        if (input === curNodeStack[curNodeStack.length - 1] /* curNode */) {
             color = "red"; // highlight currently interpreting node red
         } else {
             color = "yellow";

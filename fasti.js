@@ -380,8 +380,8 @@
     };
 
 // Hooke's law: F = -kX
-    var springLength = 30;  // default length of springs // Parameter tweak
-    var springConstant = 1; // Parameter tweak
+    var springLength = 30;    // default length of springs -- Parameter tweak
+    var springConstant = 1.3; // spring tightness          -- Parameter tweak
     var applySpring = function(inputA, inputB) {
         var d = inputB.pos.subtract(inputA.pos);
         var displacement = d.magnitude() - springLength;

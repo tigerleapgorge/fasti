@@ -10,8 +10,7 @@
     var tokenArray = [];
     var ast = [];
 
-    var curNode;  // for visualization
-    var curNodeStack = [];
+    var curNodeStack = []; // for visualization
 
 /*******         Vector Library                     ******/
     function vector(x, y) {
@@ -252,8 +251,7 @@
     };
 
     var interpret = function* (input, context) {
-        curNode = input;                          // curNode is used for visualizer
-        curNodeStack.push( input );
+        curNodeStack.push( input );  // for visualizing current program stack
         if (input.type === "expr") {              // Expression
             input.result = yield* interpretList(input.sexpr, context); // Recurse on sub Expression            
         } else if (input.type === "identifier") { // Variable
@@ -264,7 +262,7 @@
             console.error("Warning: interpret do not recognize atom type: ", input.type);
         }
         yield;
-        curNodeStack.pop();
+        curNodeStack.pop();           // must match push
         return input.result;
     };
 
@@ -329,7 +327,7 @@
     var visualize = function(input) {
         var color = "white";
         
-        if (input === curNodeStack[curNodeStack.length - 1] /* curNode */) {
+        if (input === curNodeStack[curNodeStack.length - 1]) {
             color = "red"; // highlight currently interpreting node red
         } else {
             color = "yellow";

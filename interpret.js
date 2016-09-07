@@ -2,6 +2,9 @@
 // Copyright (C) 2016 Charles Li
 
 
+/*******         Global Data                        ******/
+    var curNodeStack = []; // for visualization
+
 /*******                Parser                      ******/
     var categorize = function(curToken){
         if ( !isNaN(curToken) ) {

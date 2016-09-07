@@ -66,7 +66,7 @@
             input.a = new vector(0,0);
         }
 
-        if (input.type === "expr") {
+        if (input.sexpr !== undefined) {
             initPvaList(input.sexpr, position.add(deltaDownVector) );  // recurse
         }
     };
@@ -121,7 +121,7 @@
             drawText(input.result, input.pos.add( new vector(0,15) )); // draw result text
         }
             
-        if (input.type === "expr") {
+        if (input.sexpr !== undefined) {
             visualizeList(input.sexpr, input);  // recurse
         }
     };
@@ -131,7 +131,7 @@
     var updatePosition = function(input) {
         input.pos = input.pos.add( input.v.multiply(timestep) ); // Update pos += v*t
 
-        if(input.type === "expr") {
+        if(input.sexpr !== undefined) {
             updatePositionList(input.sexpr); // Recurse Sub-Expression
         }
     };
@@ -149,7 +149,7 @@
         input.v = input.v.multiply(damping); // damping
         input.a = input.a.multiply(damping); // ~2-3% surplus acceleration
 
-        if(input.type === "expr") {
+        if(input.sexpr !== undefined) {
             updateVelocityList(input.sexpr); // Recurse Sub-Expression
         }
     };
@@ -184,7 +184,7 @@
         }
             
         for(var i = 0; i < input.length; i++) {
-            if (input[i].type === "expr") {
+            if (input[i].sexpr !== undefined) {
                 springList(input[i].sexpr, input[i]); // Recurse - remember parent
             }
         }
@@ -212,7 +212,7 @@
             }
         }
 
-        if(input.type === "expr") {
+        if(input.sexpr !== undefined) {
             repelList(input.sexpr, other); // recurse
         }
     };

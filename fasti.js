@@ -225,12 +225,20 @@
 // Gravity to center of screen
     var centerConstant = 0.5;
     var centerOfCanvis = new vector(canvas.width / 2, canvas.height / 2);
+    var sizeOfCanvis = new vector(canvas.width, canvas.height);
 
     var gravity = function(input) {
         var distanceToCenter = centerOfCanvis.subtract(input.pos);
         var centerAcc = distanceToCenter.multiply(centerConstant);
         console.log("centerAcc", centerAcc);
-        input.a = input.a.add( centerAcc );
+
+        // start applying gravity when node is near the edge of the screen
+        if ( input.pos.x < sizeOfCanvis.x * 0.05 ||
+             input.pos.y < sizeOfCanvis.y * 0.05 ||
+             input.pos.x > sizeOfCanvis.x * 0.95 || 
+             input.pos.y > sizeOfCanvis.y * 0.95 ) {             
+            input.a = input.a.add( centerAcc );
+        }
 
         if(input.sexpr !== undefined) {
             gravityList(input.sexpr);

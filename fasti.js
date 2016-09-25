@@ -194,21 +194,18 @@
 // Simple tree layout
 
     var simpleApplySpring = function(inputA, inputB) {
-        var rightMostA = inputA.pos.x;
-        if (inputA.sexpr !== undefined &&
-            inputA.sexpr.length >= 1 &&
-            inputA.sexpr[inputA.sexpr.length - 1].x > inputA.pos.x) {
-            rightMostA = inputA.sexpr[inputA.sexpr.length - 1].x; // use the rightmost position of sub expression if it is further to the right than the parent
-        } 
 
-        var leftMostB = inputB.pos.x;
-        if (inputB.sexpr !== undefined &&
+        if(inputA.sexpr !== undefined &&
+            inputA.sexpr.length >= 1 &&
+            inputA.sexpr[inputA.sexpr.length - 1].pos.x > inputA.pos.x &&
+            inputB.sexpr !== undefined &&
             inputB.sexpr.length >= 1 &&
-            inputB.sexpr[0].x < inputB.pos.x) {
-            leftMostB = inputB.sexpr[0].x; // use the rightmost position of sub expression if it is further to the right than the parent
+            inputB.sexpr[0].pos.x < inputB.pos.x) {
+            console.error("hit");
+            simpleApplySpring(inputA.sexpr[inputA.sexpr.length - 1] , inputB.sexpr[0]);
         }
 
-        var d = leftMostB - rightMostA;
+        var d = inputB.pos.x - inputA.pos.x;
         var displacement = d - springLength;
 
         var delta_a = springConstant * displacement * 0.5;

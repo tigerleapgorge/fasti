@@ -160,7 +160,7 @@
     };
 
 // Hooke's law: F = -kX
-    var springLength = 30;    // default length of springs -- Parameter tweak
+    var springLength = 100;    // default length of springs -- Parameter tweak
     var springConstant = 1.3; // spring tightness          -- Parameter tweak
     var applySpring = function(inputA, inputB) {
         var d = inputB.pos.subtract(inputA.pos);
@@ -190,6 +190,52 @@
         }
     };
 
+
+// Simple tree layout
+
+    var simpleApplySpring = function(inputA, inputB) {
+        var rightMostA = inputA.pos.x;
+        if (inputA.sexpr !== undefined &&
+            inputA.sexpr.length >= 1 &&
+            inputA.sexpr[inputA.sexpr.length - 1].x > inputA.pos.x) {
+            rightMostA = inputA.sexpr[inputA.sexpr.length - 1].x; // use the rightmost position of sub expression if it is further to the right than the parent
+        } 
+
+        var leftMostB = inputB.pos.x;
+        if (inputB.sexpr !== undefined &&
+            inputB.sexpr.length >= 1 &&
+            inputB.sexpr[0].x < inputB.pos.x) {
+            leftMostB = inputB.sexpr[0].x; // use the rightmost position of sub expression if it is further to the right than the parent
+        }
+
+        var d = leftMostB - rightMostA;
+        var displacement = d - springLength;
+
+        var delta_a = springConstant * displacement * 0.5;
+
+        inputA.a.x = inputA.a.x + delta_a;   // core
+        inputB.a.x = inputB.a.x - delta_a;   // core
+    };
+
+    var simpleSpringList = function(input, parent) {
+        if(parent !== undefined){ // firest entry no parent
+            /*
+            for(var i = 0; i < input.length; i++) {
+                applySpring(input[i], parent); // apply spring from parent to each child
+            }
+            */  
+        }
+
+        for(var i = 1; i < input.length; i++) {
+            simpleApplySpring(input[i-1], input[i-0]); // horizontal spring between children
+        }
+            
+        for(var i = 0; i < input.length; i++) {
+            if (input[i].sexpr !== undefined) {
+                simpleSpringList(input[i].sexpr, input[i]); // Recurse - remember parent
+            }
+        }
+    };
 
 // Coulomb's law: F = k q1 q2 / r^2
     var chargeConstant = 80000; // k  // Parameter tweak
@@ -303,9 +349,12 @@
             visualizeEnv(); // draw "Context" aka symbol tables
             visualizeList(ast); // draw AST
 
+            simpleSpringList(ast);
+            /*
             springList(ast); // O(N)
             repelList(ast);  // O(N^2)
             gravityList(ast);
+            */
 
             updatePositionList(ast);
             updateVelocityList(ast);

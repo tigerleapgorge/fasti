@@ -195,33 +195,38 @@
 
     var simpleApplySpring = function(inputA, inputB) {
 
-        if(inputA.sexpr !== undefined &&
-            inputA.sexpr.length >= 1 &&
-            inputA.sexpr[inputA.sexpr.length - 1].pos.x > inputA.pos.x &&
+        if( inputA.sexpr !== undefined &&
             inputB.sexpr !== undefined &&
+            inputA.sexpr.length >= 1 &&
             inputB.sexpr.length >= 1 &&
-            inputB.sexpr[0].pos.x < inputB.pos.x) {
-            console.error("hit");
+            inputA.sexpr[inputA.sexpr.length - 1].pos.x > inputA.pos.x &&
+            inputB.sexpr[0].pos.x                       < inputB.pos.x ) {
+
             simpleApplySpring(inputA.sexpr[inputA.sexpr.length - 1] , inputB.sexpr[0]);
         }
 
         var d = inputB.pos.x - inputA.pos.x;
         var displacement = d - springLength;
 
-        var delta_a = springConstant * displacement * 0.5;
+        var delta_a = springConstant * displacement * 0.5 * 3;
 
         inputA.a.x = inputA.a.x + delta_a;   // core
         inputB.a.x = inputB.a.x - delta_a;   // core
     };
 
+    var applyTopBottom = function(topNode, bottomList) {
+        var topX    = topNode.pos.x;
+        var bottomX = (bottomList[0].pos.x + bottomList[bottomList.length -1].pos.x ) / 2;
+
+        var displacement = bottomX - topX;
+        var delta_a = springConstant * displacement * 0.5 * 5;
+
+        topNode.a.x = topNode.a.x + delta_a;   // core
+        bottomList[0].a.x = bottomList[0].a.x - delta_a;   // core
+
+    };
+
     var simpleSpringList = function(input, parent) {
-        if(parent !== undefined){ // firest entry no parent
-            /*
-            for(var i = 0; i < input.length; i++) {
-                applySpring(input[i], parent); // apply spring from parent to each child
-            }
-            */  
-        }
 
         for(var i = 1; i < input.length; i++) {
             simpleApplySpring(input[i-1], input[i-0]); // horizontal spring between children
@@ -229,6 +234,8 @@
             
         for(var i = 0; i < input.length; i++) {
             if (input[i].sexpr !== undefined) {
+                applyTopBottom(input[i], input[i].sexpr)
+
                 simpleSpringList(input[i].sexpr, input[i]); // Recurse - remember parent
             }
         }

@@ -193,16 +193,27 @@
 
 // Simple tree layout
 
+    var ssApplySpring = function(inputA, inputB) {
+
+        var d = inputB.pos.x - inputA.pos.x;
+        var displacement = d - springLength;
+
+        var delta_a = springConstant * displacement * 0.5 * 10;
+
+        inputA.a.x = inputA.a.x + delta_a;   // core
+        inputB.a.x = inputB.a.x - delta_a;   // core
+    };
+
     var simpleApplySpring = function(inputA, inputB) {
 
         if( inputA.sexpr !== undefined &&
             inputB.sexpr !== undefined &&
             inputA.sexpr.length >= 1 &&
-            inputB.sexpr.length >= 1 &&
+            inputB.sexpr.length >= 1 /* &&
             inputA.sexpr[inputA.sexpr.length - 1].pos.x > inputA.pos.x &&
-            inputB.sexpr[0].pos.x                       < inputB.pos.x ) {
+            inputB.sexpr[0].pos.x                       < inputB.pos.x */ ) {
 
-            simpleApplySpring(inputA.sexpr[inputA.sexpr.length - 1] , inputB.sexpr[0]);
+            ssApplySpring(inputA.sexpr[inputA.sexpr.length - 1] , inputB.sexpr[0]);
         }
 
         var d = inputB.pos.x - inputA.pos.x;
@@ -222,7 +233,10 @@
         var delta_a = springConstant * displacement * 0.5 * 5;
 
         topNode.a.x = topNode.a.x + delta_a;   // core
-        bottomList[0].a.x = bottomList[0].a.x - delta_a;   // core
+
+        for (var i = 0 ; i < bottomList.length ; i++) {
+            bottomList[i].a.x -=  delta_a / bottomList.length;   // core
+        }
 
     };
 

@@ -240,18 +240,53 @@
 
     };
 
-    var simpleSpringList = function(input, parent) {
+    var simpleSpringList = function(input, stack) {
 
-        for(var i = 1; i < input.length; i++) {
-            simpleApplySpring(input[i-1], input[i-0]); // horizontal spring between children
+        if (input.length >= 1 ) {
+
         }
-            
         for(var i = 0; i < input.length; i++) {
-            if (input[i].sexpr !== undefined) {
-                applyTopBottom(input[i], input[i].sexpr)
-
-                simpleSpringList(input[i].sexpr, input[i]); // Recurse - remember parent
+            if(i === 0) {
+                stack.push(input[i]);
+            } else {
+                stack[ stack.length -1 ] = input[i];
             }
+
+            if (input[i].sexpr !== undefined) {
+                simpleSpringList(input[i].sexpr, stack); // Recurse - remember parent
+            }
+        }
+    };
+
+    var BFS = function(input_queue, level){
+
+        if (level >= 50) {
+            return;
+        }
+
+        var next_level_queue = [];
+        var cur_node = undefined;
+
+        console.error("Breath First Transversal -  level", level );
+        for (var input of input_queue) {
+            console.log("BFS input: ", input);
+            for (var i = 0 ; i < input.length; i++){
+                console.log("BFS input [i , value]: ", i, input[i].value);
+
+                if(cur_node !== undefined) {
+                    ssApplySpring(cur_node, input[i]);
+                }
+                cur_node = input[i];
+
+                if (input[i].sexpr !== undefined) {
+                    next_level_queue.push(input[i].sexpr);
+                    console.log("BFS added to queue: ", next_level_queue);
+                }
+            }
+        }
+
+        if(next_level_queue.length >= 1) {
+            BFS(next_level_queue, ++level );
         }
     };
 
@@ -342,17 +377,17 @@
                                .split(/\s+/);
         ast = parenthesize(tokenArray);
 
-        var maxFrame = 10000; // <= number of Frames before Visualization stops
+        var maxFrame = 1000; // <= number of Frames before Visualization stops
 
         var frame = 0;
 
 // Visualize event loop
         var drawCall = function() { 
-           
+            /*
             if(frame > maxFrame) { // 1st Method - Stop
                 window.clearInterval(drawIntervalID);
             }
-            
+            */
             
             //console.log("drawCall", frame); // top left frames
             ctx.clearRect(0, 0, canvas.width, canvas.height); // clear screen
@@ -367,7 +402,7 @@
             visualizeEnv(); // draw "Context" aka symbol tables
             visualizeList(ast); // draw AST
 
-            simpleSpringList(ast);
+            BFS( [ast] , 0  );
             /*
             springList(ast); // O(N)
             repelList(ast);  // O(N^2)
@@ -381,16 +416,16 @@
 
             frame++;
 
-            /*
+            
             if(frame < maxFrame) { // 2nd Method - Stop
                 window.requestAnimationFrame(drawCall);
             }
-            */
+            
             return;
         };
 
-        var drawIntervalID = window.setInterval(drawCall, 5); // 1st Method Start (2nd arg in millisecond)
-        //drawCall(); // 2nd Method - Start
+        //var drawIntervalID = window.setInterval(drawCall, 5); // 1st Method Start (2nd arg in millisecond)
+        drawCall(); // 2nd Method - Start
 
 // Interpret event loop
         var libEnv  = new Context(library); // Libary Enviroment

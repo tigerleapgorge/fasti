@@ -204,27 +204,6 @@
         inputB.a.x = inputB.a.x - delta_a;   // core
     };
 
-    var simpleApplySpring = function(inputA, inputB) {
-
-        if( inputA.sexpr !== undefined &&
-            inputB.sexpr !== undefined &&
-            inputA.sexpr.length >= 1 &&
-            inputB.sexpr.length >= 1 /* &&
-            inputA.sexpr[inputA.sexpr.length - 1].pos.x > inputA.pos.x &&
-            inputB.sexpr[0].pos.x                       < inputB.pos.x */ ) {
-
-            ssApplySpring(inputA.sexpr[inputA.sexpr.length - 1] , inputB.sexpr[0]);
-        }
-
-        var d = inputB.pos.x - inputA.pos.x;
-        var displacement = d - springLength;
-
-        var delta_a = springConstant * displacement * 0.5 * 3;
-
-        inputA.a.x = inputA.a.x + delta_a;   // core
-        inputB.a.x = inputB.a.x - delta_a;   // core
-    };
-
     var applyTopBottom = function(topNode, bottomList) {
         var topX    = topNode.pos.x;
         var bottomX = (bottomList[0].pos.x + bottomList[bottomList.length -1].pos.x ) / 2;

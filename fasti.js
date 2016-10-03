@@ -192,24 +192,27 @@
 
 
 // Simple tree layout
-
+    var xSpringConstant = 10.0;
     var ssApplySpring = function(inputA, inputB) {
 
         var d = inputB.pos.x - inputA.pos.x;
         var displacement = d - springLength;
 
-        var delta_a = springConstant * displacement * 0.5 * 10;
+        var delta_a = xSpringConstant * displacement * 0.5;
 
         inputA.a.x = inputA.a.x + delta_a;   // core
         inputB.a.x = inputB.a.x - delta_a;   // core
     };
 
+    var ySpringConstant = 3.0;
     var applyTopBottom = function(topNode, bottomList) {
         var topX    = topNode.pos.x;
         var bottomX = (bottomList[0].pos.x + bottomList[bottomList.length -1].pos.x ) / 2;
 
         var displacement = bottomX - topX;
-        var delta_a = springConstant * displacement * 0.5 * 5;
+        var delta_a = ySpringConstant * displacement * 0.5;
+
+        console.error("Top Bottom delta A is: ", delta_a);
 
         topNode.a.x = topNode.a.x + delta_a;   // core
 
@@ -217,24 +220,6 @@
             bottomList[i].a.x -=  delta_a / bottomList.length;   // core
         }
 
-    };
-
-    var simpleSpringList = function(input, stack) {
-
-        if (input.length >= 1 ) {
-
-        }
-        for(var i = 0; i < input.length; i++) {
-            if(i === 0) {
-                stack.push(input[i]);
-            } else {
-                stack[ stack.length -1 ] = input[i];
-            }
-
-            if (input[i].sexpr !== undefined) {
-                simpleSpringList(input[i].sexpr, stack); // Recurse - remember parent
-            }
-        }
     };
 
     var BFS = function(input_queue, level){
@@ -246,7 +231,7 @@
         var next_level_queue = [];
         var cur_node = undefined;
 
-        console.error("Breath First Transversal -  level", level );
+        //console.error("Breath First Transversal -  level", level );
         for (var input of input_queue) {
             console.log("BFS input: ", input);
             for (var i = 0 ; i < input.length; i++){
@@ -258,6 +243,7 @@
                 cur_node = input[i];
 
                 if (input[i].sexpr !== undefined) {
+                    applyTopBottom(input[i] , input[i].sexpr);
                     next_level_queue.push(input[i].sexpr);
                     console.log("BFS added to queue: ", next_level_queue);
                 }

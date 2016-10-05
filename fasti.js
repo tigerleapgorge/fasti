@@ -10,9 +10,6 @@
     var tokenArray = [];
     var ast = [];
 
-
-
-
     var deltaRightVector = new vector(50,0);
     var deltaDownVector = new vector(0,50);
 
@@ -366,7 +363,7 @@
             
             drawText("Frame: " + frame, {x:30, y:30}); // frame counter upper left
 
-            initPvaList(ast, new vector(canvas.width/5,  canvas.height/5) ); // initialize Position, Velocity, Acceleration
+            initPvaList(ast, new vector(canvas.width/6,  canvas.height/8) ); // initialize Position, Velocity, Acceleration
             visualizeEnv(); // draw "Context" aka symbol tables
             visualizeList(ast); // draw AST
 

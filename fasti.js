@@ -96,10 +96,13 @@
 
 // Drawing AST
     var visualizeList = function(input, parent) {
+
+        if (parent !== undefined) { // draw top to bottom line
+            drawLine(parent.pos, input[0].pos, "white");
+            drawLine(parent.pos, input[input.length -1].pos, "white");
+        }
+
         for(var i = 0; i < input.length; i++){
-            if (parent !== undefined) {
-                drawLine(input[i].pos, parent.pos, "white");
-            }
             visualize(input[i]);
         }
     };

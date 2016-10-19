@@ -142,7 +142,7 @@
     };
 
 // Velocity
-    var damping = 0.9;
+    var damping = 0.8;
     var updateVelocity = function(input) {
         input.v = input.v.add( input.a.multiply(timestep) ); // Core
 
@@ -192,13 +192,13 @@
 
 
 // Simple tree layout
-    var xSpringConstant = 10.0;
-    var ssApplySpring = function(inputA, inputB) {
+    var ssApplySpring = function(inputA, inputB, inputSpringConstant) {
 
         var d = inputB.pos.x - inputA.pos.x;
         var displacement = d - springLength;
+        var d_squared = displacement * Math.abs(displacement); // preserve sign
 
-        var delta_a = xSpringConstant * displacement * 0.5;
+        var delta_a = inputSpringConstant * d_squared * 0.5;
 
         inputA.a.x = inputA.a.x + delta_a;   // core
         inputB.a.x = inputB.a.x - delta_a;   // core
@@ -232,13 +232,15 @@
         var cur_node = undefined;
 
         //console.error("Breath First Transversal -  level", level );
-        for (var input of input_queue) {
+        for (var input of input_queue) {              // interate over lists in queue
             console.log("BFS input: ", input);
-            for (var i = 0 ; i < input.length; i++){
+            for (var i = 0 ; i < input.length; i++){  // interate over nodes in list
                 console.log("BFS input [i , value]: ", i, input[i].value);
 
-                if(cur_node !== undefined) {
-                    ssApplySpring(cur_node, input[i]);
+                if(cur_node !== undefined) {  // start after the first node
+                        ssApplySpring(cur_node, input[i], 1.2 );
+                        ssApplySpring(cur_node, input[i], 0.5 );
+                    }
                 }
                 cur_node = input[i];
 
@@ -328,7 +330,7 @@
                          "                  x                       " + 
                          "                  (* x ( fib (- x 1) )  ) " +
                          "  ) )        )                            " +
-                         "  ( fib 5 )                               " +
+                         "  ( fib 3 )                               " +
                          ")                                         ";
        
         //var sourceCode = "( ( lambda (x) x ) 3 )";

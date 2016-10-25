@@ -192,8 +192,8 @@
 
 
 // Simple tree layout
-    var ssApplySpring = function(inputA, inputB, inputSpringConstant) {
 
+    var ssApplySpring = function(inputA, inputB, inputSpringConstant) {
         var d = inputB.pos.x - inputA.pos.x;
         var displacement = d - springLength;
         var d_squared = displacement * Math.abs(displacement); // preserve sign
@@ -212,8 +212,6 @@
         var displacement = bottomX - topX;
         var delta_a = ySpringConstant * displacement * 0.5;
 
-        console.error("Top Bottom delta A is: ", delta_a);
-
         topNode.a.x = topNode.a.x + delta_a;   // core
 
         for (var i = 0 ; i < bottomList.length ; i++) {
@@ -231,7 +229,6 @@
         var next_level_queue = [];
         var cur_node = undefined;
 
-        //console.error("Breath First Transversal -  level", level );
         for (var input of input_queue) {              // interate over lists in queue
             console.log("BFS input: ", input);
             for (var i = 0 ; i < input.length; i++){  // interate over nodes in list
@@ -259,6 +256,7 @@
         }
     };
 
+
 // Coulomb's law: F = k q1 q2 / r^2
     var chargeConstant = 80000; // k  // Parameter tweak
     var applyRepulsion = function(inputA, inputB){
@@ -271,6 +269,7 @@
         inputB.a = inputB.a.add( delta_acc );        // Apply acceleration to B
         return;
     };
+
     var repelAtom = function(input, other) { // other holds first time transversal input
         if(other === undefined) {  // 1st transveral 
             repelList(ast, input); // transverse AST again for each node - O(N^2)
@@ -284,6 +283,7 @@
             repelList(input.sexpr, other); // recurse
         }
     };
+
     var repelList = function(input, other) {
         for(var i = 0; i < input.length; i++){
             repelAtom(input[i], other);
@@ -332,7 +332,7 @@
                          "                  x                       " + 
                          "                  (* x ( fib (- x 1) )  ) " +
                          "  ) )        )                            " +
-                         "  ( fib 3 )                               " +
+                         "  ( fib 2 )                               " +
                          ")                                         ";
        
         //var sourceCode = "( ( lambda (x) x ) 3 )";
@@ -415,7 +415,6 @@
         };
 
         interpretLoop();
-        
 
         return;
     }

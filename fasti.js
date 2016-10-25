@@ -194,7 +194,10 @@
 // Simple tree layout
 
     var ssApplySpring = function(inputA, inputB, inputSpringConstant) {
-        var d = inputB.pos.x - inputA.pos.x;
+        //var d = inputB.pos.x - inputA.pos.x;
+        var d = inputB.leftmost - inputA.rightmost;
+
+        console.debug("what is d", d);
         var displacement = d - springLength;
         var d_squared = displacement * Math.abs(displacement); // preserve sign
 
@@ -230,9 +233,14 @@
         var cur_node = undefined;
 
         for (var input of input_queue) {              // interate over lists in queue
-            console.log("BFS input: ", input);
+            //console.log("BFS input: ", input);
             for (var i = 0 ; i < input.length; i++){  // interate over nodes in list
-                console.log("BFS input [i , value]: ", i, input[i].value);
+                //console.log("BFS input [i , value]: ", i, input[i].value);
+
+           console.assert(input[i].leftmost != undefined ,  "Leftmost does not exist");
+           console.assert(input[i].rightmost != undefined ,  "rightmost does not exist");
+
+           console.debug("BFS", input[i].leftmost)
 
                 if(cur_node !== undefined) {  // start after the first node
                     if (i === 1) {  // 1st element of cur expr with last element of prev expr
@@ -246,7 +254,7 @@
                 if (input[i].sexpr !== undefined) {
                     applyTopBottom(input[i] , input[i].sexpr);
                     next_level_queue.push(input[i].sexpr);
-                    console.log("BFS added to queue: ", next_level_queue);
+                    //console.log("BFS added to queue: ", next_level_queue);
                 }
             }
         }
@@ -289,6 +297,43 @@
             repelAtom(input[i], other);
         }
     };
+
+    var dfsAtom = function ( input ) {
+        console.debug("DFS: ", input);
+
+           if (input.sexpr != undefined && 
+               input.sexpr.length >= 1 &&
+               input.sexpr[0].pos.x < input.pos.x) {
+               input.leftmost = input.sexpr[0].pos.x;
+           } else {
+               input.leftmost = input.pos.x;
+           }
+
+           if (input.sexpr != undefined && 
+               input.sexpr.length >= 1 &&
+               input.sexpr[input.sexpr.length-1].pos.x > input.pos.x) {
+               input.rightmost = input.sexpr[0].pos.x;
+           } else {
+               input.rightmost = input.pos.x;
+           }
+
+           console.assert(input.leftmost <= input.pos.x ,  "Leftmost must to to the left of current X");
+           console.assert(input.rightmost >= input.pos.x ,  "Rightmost must to to the right of current X"); 
+           console.debug("With leftmost and rightmost", input);
+
+
+        if (input.sexpr != undefined ) {
+           dfsList( input.sexpr );
+        }
+    }
+
+    var dfsList = function( input ) {
+        for(var i = 0; i < input.length ; i++) {
+            dfsAtom(input[i]);
+        }
+
+    };
+
 
 // Gravity to center of screen
     var centerConstant = 0.5;
@@ -371,7 +416,11 @@
             visualizeEnv(); // draw "Context" aka symbol tables
             visualizeList(ast); // draw AST
 
+            dfsList( ast ); // calc leftmost and rightmost of a current node with its sub-expression
+
             BFS( [ast] , 0  );
+
+            
             /*
             springList(ast); // O(N)
             repelList(ast);  // O(N^2)

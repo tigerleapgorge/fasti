@@ -238,7 +238,9 @@
                 console.log("BFS input [i , value]: ", i, input[i].value);
 
                 if(cur_node !== undefined) {  // start after the first node
+                    if (i === 1) {  // 1st element of cur expr with last element of prev expr
                         ssApplySpring(cur_node, input[i], 1.2 );
+                    } else { // within the same expr
                         ssApplySpring(cur_node, input[i], 0.5 );
                     }
                 }

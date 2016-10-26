@@ -244,9 +244,9 @@
 
                 if(cur_node !== undefined) {  // start after the first node
                     if (i === 1) {  // 1st element of cur expr with last element of prev expr
-                        ssApplySpring(cur_node, input[i], 1.2 );
+                        ssApplySpring(cur_node, input[i], 0.2 );
                     } else { // within the same expr
-                        ssApplySpring(cur_node, input[i], 0.5 );
+                        ssApplySpring(cur_node, input[i], 0.3 );
                     }
                 }
                 cur_node = input[i];
@@ -300,7 +300,7 @@
 
     var dfsAtom = function ( input ) {
         console.debug("DFS: ", input);
-
+/*
            if (input.sexpr != undefined && 
                input.sexpr.length >= 1 &&
                input.sexpr[0].pos.x < input.pos.x) {
@@ -320,16 +320,39 @@
            console.assert(input.leftmost <= input.pos.x ,  "Leftmost must to to the left of current X");
            console.assert(input.rightmost >= input.pos.x ,  "Rightmost must to to the right of current X"); 
            console.debug("With leftmost and rightmost", input);
-
-
+*/
+        var listRT = undefined;
         if (input.sexpr != undefined ) {
-           dfsList( input.sexpr );
+           listRT = dfsList( input.sexpr );
         }
+
+        if (listRT != undefined ) {
+            if ( listRT.leftmost <= input.pos.x ) {
+                input.leftmost = listRT.leftmost
+            } else {
+                input.leftmost = input.pos.x;
+            }
+
+            if ( listRT.rightmost >= input.pos.x ) {
+                input.rightmost = listRT.rightmost
+            } else {
+                input.rightmost = input.pos.x;
+            }
+        } else {
+            input.leftmost = input.pos.x;
+            input.rightmost = input.pos.x;
+        }
+        console.assert(input.leftmost <= input.pos.x ,  "Leftmost must to to the left of current X");
+        console.assert(input.rightmost >= input.pos.x ,  "Rightmost must to to the right of current X");
     }
 
     var dfsList = function( input ) {
         for(var i = 0; i < input.length ; i++) {
             dfsAtom(input[i]);
+        }
+
+        if( input.length >= 1 ) {
+            return {leftmost : input[0].pos.x , rightmost : input[input.length-1].pos.x}
         }
 
     };
@@ -370,17 +393,17 @@
 
     function main(){
         //var sourceCode = "( ( define foo ( lambda (a b) (+ a b) ) ) (foo 1 2) )";
-       
+       /*
         var sourceCode = "( ( define fib                            " +
                          "    ( lambda (x)                          " + 
                          "             ( if ( < x 2 )               " +  
                          "                  x                       " + 
                          "                  (* x ( fib (- x 1) )  ) " +
                          "  ) )        )                            " +
-                         "  ( fib 2 )                               " +
+                         "  ( fib 1 )                               " +
                          ")                                         ";
-       
-        //var sourceCode = "( ( lambda (x) x ) 3 )";
+       */
+        var sourceCode = "( ( lambda (x) x ) 3 )";
         //var sourceCode = "(+ 3 5)";
         //var sourceCode = "(1 2 3)";
         //var sourceCode = "(/ 6 3)";

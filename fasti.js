@@ -20,16 +20,18 @@
         ctx.fillText(myStr, posVector.x, posVector.y+20);
     };
 
+    var nodeLength = 35;
+
     var drawRect = function(position, color) {
         ctx.fillStyle = color;
-        ctx.fillRect(position.x, position.y, 35, 35); // Rectangle size
+        ctx.fillRect(position.x, position.y, nodeLength, nodeLength); // Rectangle size
     };
 
-    var drawLine = function(position1, position2, color) {
+    var drawLine = function(position1, position2, lineColor) {
         ctx.beginPath();
-        ctx.moveTo(position1.x, position1.y);
-        ctx.lineTo(position2.x, position2.y);
-        ctx.strokeStyle = color;
+        ctx.moveTo(position1.x + (nodeLength/2) , position1.y + nodeLength); // starts at center bottom
+        ctx.lineTo(position2.x + (nodeLength/2) , position2.y);  // ends at center top
+        ctx.strokeStyle = lineColor;
         ctx.stroke();
     };
 

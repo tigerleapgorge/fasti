@@ -112,7 +112,7 @@
         if (input === curNodeStack[curNodeStack.length - 1]) {
             color = "red"; // highlight currently interpreting node red
         } else {
-            color = "yellow";
+            color = "#FFEB3B";
         }
         
         drawRect(input.pos, color);

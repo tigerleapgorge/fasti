@@ -232,40 +232,6 @@
         }
     };
 
-
-// Coulomb's law: F = k q1 q2 / r^2
-    var chargeConstant = 80000; // k  // Parameter tweak
-    var applyRepulsion = function(inputA, inputB){
-        var distance = inputB.pos.subtract(inputA.pos); // TODO: when input1 and input2 pos overlap
-        var distance_magSquared = distance.magnitudeSquared(); // denominator
-        var direction = distance.normalize(); // unit length
-
-        var delta_acc = direction.multiply(0.5 * chargeConstant / (distance_magSquared + 30 ) );   // Parameter tweak 
-        inputA.a = inputA.a.add( delta_acc.neg() );  // Apply acceleration to A
-        inputB.a = inputB.a.add( delta_acc );        // Apply acceleration to B
-        return;
-    };
-
-    var repelAtom = function(input, other) { // other holds first time transversal input
-        if(other === undefined) {  // 1st transveral 
-            repelList(ast, input); // transverse AST again for each node - O(N^2)
-        } else { // 2nd transversal - other holds current node
-            if(input !== other){
-                applyRepulsion(input, other); // apply electrostatic force between each node with every other node
-            }
-        }
-
-        if(input.sexpr !== undefined) {
-            repelList(input.sexpr, other); // recurse
-        }
-    };
-
-    var repelList = function(input, other) {
-        for(var i = 0; i < input.length; i++){
-            repelAtom(input[i], other);
-        }
-    };
-
     var dfsAtom = function ( input ) {
         console.debug("DFS: ", input);
 /*
@@ -413,7 +379,6 @@
 
             
             /*
-            repelList(ast);  // O(N^2)
             gravityList(ast);
             */
 

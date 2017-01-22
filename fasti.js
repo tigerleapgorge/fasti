@@ -144,7 +144,7 @@
     };
 
 // Velocity
-    var damping = 0.8;
+    var damping = 0.7;
     var updateVelocity = function(input) {
         input.v = input.v.add( input.a.multiply(timestep) ); // Core
 
@@ -194,22 +194,22 @@
 
 
 // Simple tree layout
-
-    var ssApplySpring = function(inputA, inputB, inputSpringConstant) {
+    var xSpringConstant = 20;
+    var ssApplySpring = function(inputA, inputB) {
         //var d = inputB.pos.x - inputA.pos.x;
         var d = inputB.leftmost - inputA.rightmost;
 
         console.debug("what is d", d);
         var displacement = d - springLength;
-        var d_squared = displacement * Math.abs(displacement); // preserve sign
+        var d_squared = displacement ; // preserve sign
 
-        var delta_a = inputSpringConstant * d_squared * 0.5;
+        var delta_a = xSpringConstant * d_squared * 0.5;
 
         inputA.a.x = inputA.a.x + delta_a;   // core
         inputB.a.x = inputB.a.x - delta_a;   // core
     };
 
-    var ySpringConstant = 3.0;
+    var ySpringConstant = 100.0;
     var applyTopBottom = function(topNode, bottomList) {
         var topX    = topNode.pos.x;
         var bottomX = (bottomList[0].pos.x + bottomList[bottomList.length -1].pos.x ) / 2;
@@ -220,7 +220,7 @@
         topNode.a.x = topNode.a.x + delta_a;   // core
 
         for (var i = 0 ; i < bottomList.length ; i++) {
-            bottomList[i].a.x -=  delta_a / bottomList.length;   // core
+            bottomList[i].a.x -=  delta_a;   // core
         }
 
     };
@@ -245,11 +245,8 @@
            console.debug("BFT", input[i].leftmost)
 
                 if(cur_node !== undefined) {  // start after the first node
-                    if (i === 1) {  // 1st element of cur expr with last element of prev expr
-                        ssApplySpring(cur_node, input[i], 0.2 );
-                    } else { // within the same expr
-                        ssApplySpring(cur_node, input[i], 0.3 );
-                    }
+                    ssApplySpring(cur_node, input[i]);
+
                 }
                 cur_node = input[i];
 

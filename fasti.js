@@ -225,7 +225,7 @@
 
     };
 
-    var BFS = function(input_queue, level){
+    var BFS = function(input_queue, level){ // Apply horizontal force
 
         if (level >= 50) {
             return;
@@ -443,7 +443,7 @@
 
             dfsList( ast ); // calc leftmost and rightmost of a current node with its sub-expression
 
-            BFS( [ast] , 0  );
+            BFS( [ast] , 0  ); // Apply horizontal force
 
             
             /*

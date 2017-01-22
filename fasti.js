@@ -163,37 +163,6 @@
 
 // Hooke's law: F = -kX
     var springLength = 100;    // default length of springs -- Parameter tweak
-    var springConstant = 1.3; // spring tightness          -- Parameter tweak
-    var applySpring = function(inputA, inputB) {
-        var d = inputB.pos.subtract(inputA.pos);
-        var displacement = d.magnitude() - springLength;
-        var direction = d.normalize();
-
-        var delta_a = direction.multiply(springConstant * displacement * 0.5 )
-
-        inputA.a = inputA.a.add( delta_a );       // core
-        inputB.a = inputB.a.add( delta_a.neg() ); // core
-    };
-    var springList = function(input, parent) {
-        if(parent !== undefined){ // firest entry no parent
-            for(var i = 0; i < input.length; i++) {
-                applySpring(input[i], parent); // apply spring from parent to each child
-            }
-        }
-
-        for(var i = 1; i < input.length; i++) {
-            applySpring(input[i-1], input[i-0]); // horizontal spring between children
-        }
-            
-        for(var i = 0; i < input.length; i++) {
-            if (input[i].sexpr !== undefined) {
-                springList(input[i].sexpr, input[i]); // Recurse - remember parent
-            }
-        }
-    };
-
-
-// Simple tree layout
     var xSpringConstant = 20;
     var ssApplySpring = function(inputA, inputB) {
         //var d = inputB.pos.x - inputA.pos.x;
@@ -392,7 +361,7 @@
 
     function main(){
         //var sourceCode = "( ( define foo ( lambda (a b) (+ a b) ) ) (foo 1 2) )";
-       /*
+       
         var sourceCode = "( ( define fib                            " +
                          "    ( lambda (x)                          " + 
                          "             ( if ( < x 2 )               " +  
@@ -401,8 +370,8 @@
                          "  ) )        )                            " +
                          "  ( fib 1 )                               " +
                          ")                                         ";
-       */
-        var sourceCode = "( ( lambda (x) x ) 3 )";
+       
+        //var sourceCode = "( ( lambda (x) x ) 3 )";
         //var sourceCode = "(+ 3 5)";
         //var sourceCode = "(1 2 3)";
         //var sourceCode = "(/ 6 3)";
@@ -413,7 +382,7 @@
                                .split(/\s+/);
         ast = parenthesize(tokenArray);
 
-        var maxFrame = 1000; // <= number of Frames before Visualization stops
+        var maxFrame = 10000; // <= number of Frames before Visualization stops
 
         var frame = 0;
 
@@ -444,7 +413,6 @@
 
             
             /*
-            springList(ast); // O(N)
             repelList(ast);  // O(N^2)
             gravityList(ast);
             */

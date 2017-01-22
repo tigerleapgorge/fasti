@@ -225,7 +225,7 @@
 
     };
 
-    var BFS = function(input_queue, level){ // Apply horizontal force
+    var BFT = function(input_queue, level){ // Apply horizontal force
 
         if (level >= 50) {
             return;
@@ -235,14 +235,14 @@
         var cur_node = undefined;
 
         for (var input of input_queue) {              // interate over lists in queue
-            //console.log("BFS input: ", input);
+            //console.log("BFT input: ", input);
             for (var i = 0 ; i < input.length; i++){  // interate over nodes in list
-                //console.log("BFS input [i , value]: ", i, input[i].value);
+                //console.log("BFT input [i , value]: ", i, input[i].value);
 
            console.assert(input[i].leftmost != undefined ,  "Leftmost does not exist");
            console.assert(input[i].rightmost != undefined ,  "rightmost does not exist");
 
-           console.debug("BFS", input[i].leftmost)
+           console.debug("BFT", input[i].leftmost)
 
                 if(cur_node !== undefined) {  // start after the first node
                     if (i === 1) {  // 1st element of cur expr with last element of prev expr
@@ -256,13 +256,13 @@
                 if (input[i].sexpr !== undefined) {
                     applyTopBottom(input[i] , input[i].sexpr);
                     next_level_queue.push(input[i].sexpr);
-                    //console.log("BFS added to queue: ", next_level_queue);
+                    //console.log("BFT added to queue: ", next_level_queue);
                 }
             }
         }
 
         if(next_level_queue.length >= 1) {
-            BFS(next_level_queue, ++level );
+            BFT(next_level_queue, ++level );
         }
     };
 
@@ -443,7 +443,7 @@
 
             dfsList( ast ); // calc leftmost and rightmost of a current node with its sub-expression
 
-            BFS( [ast] , 0  ); // Apply horizontal force
+            BFT( [ast] , 0  ); // Apply horizontal force
 
             
             /*

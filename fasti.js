@@ -205,8 +205,8 @@
 
         var delta_a = inputSpringConstant * d_squared * 0.5;
 
-        inputA.v.x =  delta_a;   // core
-        inputB.v.x = - delta_a;   // core
+        inputA.a.x = inputA.a.x + delta_a;   // core
+        inputB.a.x = inputB.a.x - delta_a;   // core
     };
 
     var ySpringConstant = 3.0;

@@ -234,27 +234,6 @@
 
     var dfsAtom = function ( input ) {
         console.debug("DFS: ", input);
-/*
-           if (input.sexpr != undefined && 
-               input.sexpr.length >= 1 &&
-               input.sexpr[0].pos.x < input.pos.x) {
-               input.leftmost = input.sexpr[0].pos.x;
-           } else {
-               input.leftmost = input.pos.x;
-           }
-
-           if (input.sexpr != undefined && 
-               input.sexpr.length >= 1 &&
-               input.sexpr[input.sexpr.length-1].pos.x > input.pos.x) {
-               input.rightmost = input.sexpr[0].pos.x;
-           } else {
-               input.rightmost = input.pos.x;
-           }
-
-           console.assert(input.leftmost <= input.pos.x ,  "Leftmost must to to the left of current X");
-           console.assert(input.rightmost >= input.pos.x ,  "Rightmost must to to the right of current X"); 
-           console.debug("With leftmost and rightmost", input);
-*/
         var listRT = undefined;
         if (input.sexpr != undefined ) {
            listRT = dfsList( input.sexpr );

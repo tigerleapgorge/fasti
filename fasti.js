@@ -129,7 +129,8 @@
 // Position
     var timestep = 0.01; // Time Step -- super important
     var updatePosition = function(input) {
-        input.pos = input.pos.add( input.v.multiply(timestep) ); // Update pos += v*t
+        //input.pos = input.pos.add( input.v.multiply(timestep) ); // Update pos += v*t
+        input.pos.x = input.pos.add( input.v.multiply(timestep) ).x; // Update pos += v*t
 
         if(input.sexpr !== undefined) {
             updatePositionList(input.sexpr); // Recurse Sub-Expression
